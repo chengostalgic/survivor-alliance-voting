@@ -13,13 +13,14 @@ from mcp.server.stdio import stdio_server
 from slimconfig import build_output, output_schema, plain_output
 
 from contract import TOOLS, Tool
-from plugin import find_rescue, plan_advantages, resolve_vote
+from plugin import evaluate_scenario, find_rescue, plan_advantages, resolve_vote
 
 server = Server("survivor-alliance")
 # NanoAgent names the one folder this plugin may write to.
 WORKSPACE_ENV = "NANOAGENT_WORKSPACE"
 # Each tool's implementation: (its input, the workspace) -> its output, as contract.TOOLS types them.
 IMPLEMENTATIONS = {
+    Tool.EVALUATE_SCENARIO: evaluate_scenario,
     Tool.RESOLVE_VOTE: resolve_vote,
     Tool.FIND_RESCUE: find_rescue,
     Tool.PLAN_ADVANTAGES: plan_advantages,

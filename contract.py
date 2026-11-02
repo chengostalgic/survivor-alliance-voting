@@ -8,12 +8,14 @@ from slimconfig import Output
 
 
 class Tool(Enum):
+    EVALUATE_SCENARIO = "evaluate_scenario"
     RESOLVE_VOTE = "resolve_vote"
     FIND_RESCUE = "find_rescue"
     PLAN_ADVANTAGES = "plan_advantages"
 
 
 class Task(Enum):
+    SCENARIO_OUTCOME = "scenario-outcome"
     ALLIANCE_SURVIVAL = "alliance-survival"
     SINGLE_VOTE_RESCUE = "single-vote-rescue"
     ADVANTAGE_PLANNER = "advantage-planner"
@@ -50,6 +52,13 @@ class AdvantageDecision(Enum):
     NO_SAVING_PLAN = "no_saving_plan"
 
 
+class PersonalOutcome(Enum):
+    NOT_SPECIFIED = "not_specified"
+    YOU_GO_HOME = "you_go_home"
+    ALLY_GOES_HOME = "ally_goes_home"
+    ALLIANCE_SAFE = "alliance_safe"
+
+
 @dataclass
 class Ballot(Output):
     voter: Annotated[str, "An attending contestant, casting exactly one vote"]
@@ -72,7 +81,9 @@ class CouncilInput(Output):
     ]
     alliance: Annotated[list[str], "Nonempty subset; survival means every listed member remains"]
     votes: Annotated[
-        list[Ballot], "Exactly one initial ballot per contestant; expand grouped prose votes. Ask for missing ballots."
+        list[Ballot],
+        "Exactly one assumed ordinary ballot per contestant, before blocks and extra votes. Expand grouped prose; "
+        "ask for missing ballots. These are scenario assumptions, not predictions of actual votes.",
     ]
     challenge_immune: Annotated[list[str], "Contestants who cannot receive any ballot; [] when the user says nobody"]
     idol_protected: Annotated[
@@ -152,6 +163,46 @@ class AdvantagePlay(Output):
 
 
 @dataclass
+class PlayedAdvantage(Output):
+    id: Annotated[str, "Unique label for this single-use item, 1 to 40 printable trimmed characters"]
+    owner: Annotated[str, "The contestant using the item; can be an ally or opponent"]
+    kind: AdvantageKind
+    target: Annotated[
+        str,
+        "Idol: protected RECIPIENT, which can differ from owner. Extra vote: additional ballot target. "
+        "Vote block: contestant whose ordinary initial ballot is removed. Ask if the target is missing.",
+    ]
+
+
+@dataclass
+class ScenarioInput(Output):
+    council: Annotated[
+        CouncilInput,
+        "Complete assumed ordinary votes and tie rules. Keep idol_protected empty: list every played idol in plays.",
+    ]
+    plays: Annotated[
+        list[PlayedAdvantage],
+        "All 0 to 24 items assumed PLAYED in this scenario, including opponents' plays. Held items have no effect. "
+        "Use [] when the user explicitly says no items are played; never invent a play from ownership.",
+    ]
+    perspective: Annotated[
+        str | None,
+        "The user's contestant name, which must be in the alliance; null if they have not identified themselves. "
+        "Never guess which named contestant 'I' means.",
+    ]
+
+
+@dataclass
+class ScenarioOutput(Output):
+    scenario: Annotated[ScenarioInput, "Echo of the assumed facts, for checking the chat model's interpretation"]
+    outcome: Annotated[CouncilOutput, "Calculated outcome conditional on exactly these votes, plays, and rules"]
+    personal_outcome: PersonalOutcome
+    idol_recipients: Annotated[list[str], "Protected recipients in roster order; ownership alone gives no protection"]
+    blocked_voters: Annotated[list[str], "Voters whose ordinary initial ballot was removed, in roster order"]
+    extra_votes: Annotated[list[Ballot], "Added ballots in supplied play order, including idol-nullified extra votes"]
+
+
+@dataclass
 class AdvantagePlan(Output):
     plays: list[AdvantagePlay]
     outcome: Annotated[
@@ -192,11 +243,13 @@ class AdvantageOutput(Output):
 
 
 TOOLS = {
+    Tool.EVALUATE_SCENARIO: (ScenarioInput, ScenarioOutput),
     Tool.RESOLVE_VOTE: (CouncilInput, CouncilOutput),
     Tool.FIND_RESCUE: (CouncilInput, RescueOutput),
     Tool.PLAN_ADVANTAGES: (AdvantageInput, AdvantageOutput),
 }
 TASKS = {
+    Task.SCENARIO_OUTCOME: (ScenarioInput, ScenarioOutput),
     Task.ALLIANCE_SURVIVAL: (CouncilInput, CouncilOutput),
     Task.SINGLE_VOTE_RESCUE: (CouncilInput, RescueOutput),
     Task.ADVANTAGE_PLANNER: (AdvantageInput, AdvantageOutput),

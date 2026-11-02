@@ -1,15 +1,16 @@
 _ > nanoagent.plugin.v0001.ProductConfig:
-tagline: "Play the idol, use a vote advantage, or keep your items?"
+tagline: "Given these votes and plays, who goes home?"
 summary: >-
-  Describe the known votes and your available advantages in chat. Compare doing
-  nothing, playing idols, adding votes, and blocking votes. Find which plays save
-  the whole alliance and how many items they cost, with verified vote outcomes.
+  Describe a hypothetical council in chat, assuming you know every vote and which
+  idols and advantages are played. Calculate who leaves and whether you or an ally
+  goes home. Inspect verified tallies under those assumptions; this is a scenario
+  calculator, and does not predict actual secret votes.
 highlights:
-  - "Explain the council and available items in ordinary language."
-  - "Compare idols, extra votes, vote blocks, and keeping your items."
-  - "Find plans using the fewest items, or explore a single changed vote."
-  - "Inspect the interpreted facts, before/after tallies, and verified outcomes."
+  - "Explain assumed votes and explicit item plays in ordinary language."
+  - "Distinguish owning an idol from playing it on a particular recipient."
+  - "See who leaves, whether you survive, and whether your whole alliance stays."
+  - "Check the interpreted assumptions and independently verified vote totals."
 steps:
-  - "Describe your cast, alliance, intended votes, immunity, and tie rules."
-  - "List your usable items and ask whether anything needs to be played."
-  - "Compare the baseline and alternatives, including who leaves after each play."
+  - "Describe the roster, alliance, assumed ordinary votes, immunity, and tie rules."
+  - "List every idol, extra vote, and vote block being played, or say there are none."
+  - "Read the conditional outcome and check that the interpreted facts match your scenario."

@@ -92,3 +92,36 @@ def test_advantage_renderer_messages(tmp_path, name, valid, words):
         assert "Check the interpreted council and inventory" in result.stdout
     else:
         assert "An advantage play saves" not in result.stdout
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="renderer smoke test needs Node")
+@pytest.mark.parametrize(
+    "name,valid,words",
+    [
+        ("you-go-home", True, "You go home in this scenario"),
+        ("ally-goes-home", True, "An ally goes home in this scenario"),
+        ("idol-on-someone-else", True, "You and your whole alliance stay"),
+        ("identity-unspecified", True, "An alliance member goes home"),
+        ("idol-on-someone-else", False, "Verification failed"),
+    ],
+)
+def test_scenario_renderer_messages(tmp_path, name, valid, words):
+    sample = json.loads((ROOT / "tests/fixed_scenarios" / f"{name}.expected.json").read_text())
+    source = (ROOT / "ui/renderers.js").read_text().replace("./kit/components.js", "./components.mjs")
+    (tmp_path / "renderers.mjs").write_text(source)
+    (tmp_path / "components.mjs").write_text(KIT_STUB)
+    (tmp_path / "draw.mjs").write_text(DRAW)
+    (tmp_path / "sample.json").write_text(json.dumps(sample))
+    (tmp_path / "verdict.json").write_text(
+        json.dumps({"valid": valid, "message": "valid" if valid else "check failed"})
+    )
+    result = subprocess.run(
+        ["node", "draw.mjs", "ScenarioOutput"], cwd=tmp_path, capture_output=True, text=True, check=True
+    )
+    assert words in result.stdout
+    if valid:
+        assert "Under your assumed votes and plays" in result.stdout
+        assert "Check the assumed scenario" in result.stdout
+        assert "does not establish that people will actually vote" in result.stdout
+    else:
+        assert "You and your whole alliance stay" not in result.stdout

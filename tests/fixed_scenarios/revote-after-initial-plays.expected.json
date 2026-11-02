@@ -1,0 +1,130 @@
+{
+  "scenario": {
+    "council": {
+      "contestants": [
+        "Ava",
+        "Ben",
+        "Cora",
+        "Drew"
+      ],
+      "alliance": [
+        "Ava",
+        "Cora"
+      ],
+      "votes": [
+        {
+          "voter": "Ava",
+          "target": "Ben"
+        },
+        {
+          "voter": "Ben",
+          "target": "Ava"
+        },
+        {
+          "voter": "Cora",
+          "target": "Ava"
+        },
+        {
+          "voter": "Drew",
+          "target": "Ben"
+        }
+      ],
+      "challenge_immune": [],
+      "idol_protected": [],
+      "rules": {
+        "tie_rule": "revote_priority",
+        "priority_order": [
+          "Ben",
+          "Ava",
+          "Cora",
+          "Drew"
+        ]
+      },
+      "revotes": [
+        {
+          "voter": "Cora",
+          "target": "Ben"
+        },
+        {
+          "voter": "Drew",
+          "target": "Ben"
+        }
+      ]
+    },
+    "plays": [
+      {
+        "id": "Ava-block",
+        "owner": "Ava",
+        "kind": "vote_block",
+        "target": "Drew"
+      },
+      {
+        "id": "Drew-extra",
+        "owner": "Drew",
+        "kind": "extra_vote",
+        "target": "Ben"
+      }
+    ],
+    "perspective": "Ava"
+  },
+  "outcome": {
+    "eliminated": "Ben",
+    "alliance_survives": true,
+    "alliance_remaining": [
+      "Ava",
+      "Cora"
+    ],
+    "initial_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 2
+      },
+      {
+        "contestant": "Ben",
+        "votes": 2
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 0
+      }
+    ],
+    "nullified_votes": 0,
+    "revote_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 0
+      },
+      {
+        "contestant": "Ben",
+        "votes": 2
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 0
+      }
+    ],
+    "resolution": "revote",
+    "deciding_candidates": [
+      "Ben"
+    ]
+  },
+  "personal_outcome": "alliance_safe",
+  "idol_recipients": [],
+  "blocked_voters": [
+    "Drew"
+  ],
+  "extra_votes": [
+    {
+      "voter": "Drew",
+      "target": "Ben"
+    }
+  ]
+}

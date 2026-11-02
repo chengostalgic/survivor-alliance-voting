@@ -23,6 +23,11 @@ def leaders(counts, eligible):
 
 def resolve_vote(council: CouncilInput, workspace: Path) -> CouncilOutput:
     """Resolve one council without network access, randomness, or file writes."""
+    return resolve_effective_vote(council, council.votes)
+
+
+def resolve_effective_vote(council: CouncilInput, effective_ballots) -> CouncilOutput:
+    """Validate intended ordinary votes, then count a caller's explicit post-advantage ballots."""
     names = council.contestants
     if not 2 <= len(names) <= 24 or len(set(names)) != len(names):
         raise ValueError("contestants must contain 2 to 24 unique names")
@@ -43,7 +48,7 @@ def resolve_vote(council: CouncilInput, workspace: Path) -> CouncilOutput:
     check_ballots(council.votes, names, set(names) - set(council.challenge_immune))
     counts = Counter({name: 0 for name in names})
     nullified = 0
-    for ballot in council.votes:
+    for ballot in effective_ballots:
         if ballot.target in council.idol_protected:
             nullified += 1
         else:

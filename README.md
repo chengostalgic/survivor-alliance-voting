@@ -1,13 +1,19 @@
 # Survivor Alliance
 
-Does **every member of your alliance** survive one Survivor-style tribal council?
-If they do not, can **one changed alliance vote** save everyone?
-Or do you need to **play an idol, use a vote advantage, or save your items**?
+**Given these assumed votes and item plays, who goes home?**
 
-Supply the contestants, alliance, initial ballots, immunity, and explicit tie rules.
-The result identifies who leaves, shows the counted votes, and answers whether the
-whole alliance remains. A correct result can say that the alliance **does not**
-survive: verification measures correctness, not a favorable outcome.
+Evaluate one fully specified hypothetical Survivor-style council. Supply who is
+voting for whom, every idol and advantage being played, challenge immunity, and
+explicit tie rules. The plugin calculates who leaves, whether it is you or an
+ally, and whether every alliance member stays. Describe it in ordinary chat;
+you do not need to prepare JSON.
+
+**The major limitation:** all votes and plays must be known *within the guessed
+scenario*. Actual players may vote or act differently. A valid verifier verdict
+means the calculation follows the supplied assumptions and declared rules. It
+does not certify that the scenario will happen or that the chat model understood
+your prose correctly. A correct result saying **you go home** or **an ally goes
+home** passes just as a correct safe result does.
 
 This is an original, self-contained `nanoagent.plugin/v0001` plugin. It needs
 Python 3.12+, Git, and uv. The tool needs no API key, network access, external
@@ -17,6 +23,7 @@ dataset, or LLM.
 
 | Tool | Input → output | Purpose |
 |---|---|---|
+| `evaluate_scenario` | `ScenarioInput` → `ScenarioOutput` | Evaluate one fixed assumed council, including explicit allied or opposing item plays and your personal outcome. |
 | `resolve_vote` | `CouncilInput` → `CouncilOutput` | Resolve the complete supplied council under the rules below. |
 | `find_rescue` | `CouncilInput` → `RescueOutput` | Check every legal initial-vote change by one alliance member and find saving moves. |
 | `plan_advantages` | `AdvantageInput` → `AdvantageOutput` | Compare holding items, idols, extra votes, and vote blocks; find plays using the fewest items. |
@@ -25,6 +32,7 @@ dataset, or LLM.
 
 | Task | Runner | Purpose |
 |---|---|---|
+| `scenario-outcome` | `tool`, calling `evaluate_scenario` | Default chat task: calculate who leaves under the supplied votes and plays. |
 | `alliance-survival` | `tool`, calling `resolve_vote` | Determine whether every alliance member remains after the vote. |
 | `single-vote-rescue` | `tool`, calling `find_rescue` | Find whether a single alliance ballot can save everyone, using an explicit priority tie rule. |
 | `advantage-planner` | `tool`, calling `plan_advantages` | Decide whether an optional advantage is needed and compare its resulting vote outcomes. |
@@ -33,7 +41,67 @@ The tool runner makes local task execution reproducible without model credential
 RUSH's chat can invoke this task. The plugin does not predict votes or ask an
 agent to invent missing ballots.
 
-### Describe the situation in ordinary chat
+### Evaluate a guessed scenario in ordinary chat
+
+Paste this into the installed plugin's chat:
+
+```text
+Evaluate this hypothetical council. I am John.
+The contestants are John, Esther, Cora, Drew, and Eli.
+Our alliance is John and Esther.
+Assume John and Esther vote for Drew. Cora, Drew, and Eli vote for John.
+Nobody has challenge immunity.
+Esther plays her idol, Esther-idol, on John. No other idols or advantages are played.
+For this hypothetical, no revote: eliminate the first tied contestant in this
+order: John, Esther, Cora, Drew, Eli.
+Under exactly these assumptions, who goes home? Does our alliance survive?
+```
+
+John's three votes are nullified. Drew leaves with two counted votes, so John
+and Esther both stay. Esther owns the idol; **John is its protected recipient**.
+
+Then try: "Keep the same votes and rules, but Esther holds her idol and nobody
+plays any item." John now leaves 3–2. The correct personal result is
+`you_go_home`, and the verifier still returns a valid score of 1. Identifying
+yourself as Esther instead makes the same elimination `ally_goes_home`.
+
+The task accepts all **0–24 explicitly played items**, including opponents'
+items. It does not search for better plays. Held items have no effect and need
+no inventory. State "no items are played" or "no other plays" so the chat does
+not have to ask whether any additional effects are missing. "Esther has an
+idol" alone gives no protection; a play requires its recipient.
+
+`ScenarioInput` contains `council`, `plays`, and `perspective` (a named alliance
+member, or null when unidentified). Each play supplies a unique item `id`, an
+`owner`, a `kind`, and a `target`. For this task, `council.idol_protected` stays
+empty; **every** played idol is listed explicitly in `plays`.
+
+The declared effects are:
+
+- An idol nullifies ordinary and extra votes against its **recipient**. Protection
+  lasts through the supplied revote and rock rules. It does not protect its owner
+  unless the owner is the recipient.
+- A vote block removes its target's ordinary **initial** ballot, once. It can
+  target a challenge-immune voter. It does not remove an extra ballot.
+- An extra vote adds a separate initial ballot from the owner, including when
+  that owner's ordinary ballot is blocked. It cannot target its owner or a
+  challenge-immune contestant. Extra votes may be nullified by idols.
+- Blocks and extra votes affect the initial round only. Supplied revotes follow
+  the council rules below, so a blocked initial voter can vote in a revote.
+  This is an explicit reproducible variant, not every television season.
+
+`ScenarioOutput` echoes the assumptions and contains the complete `outcome`,
+`personal_outcome` (`you_go_home`, `ally_goes_home`, `alliance_safe`, or
+`not_specified`), `idol_recipients`, `blocked_voters`, and `extra_votes`. Its card
+shows the assumed facts and states the result conditionally. An independent
+verifier checks all six fields, including the personal result and the full
+initial/revote tallies. No prediction or LLM judge is involved.
+
+Tie rules must still be explicit. A deterministic priority or rock order is a
+hypothetical input; it does not predict a random draw. Missing ballots, item
+targets, and essential tie facts require clarification, rather than guesses.
+
+### Optional: compare a different vote
 
 You do not have to write JSON. RUSH's chat model converts your description into
 the typed task input. For example, paste this into the installed plugin's chat:
@@ -61,8 +129,8 @@ English; language interpretation is performed by the chat model and can be
 mistaken. RUSH chat uses its configured model/key; the local Python tasks and
 their tests make no model calls.
 
-Follow up naturally, for example: "What if Drew plays an idol?" or "Ben's vote
-was actually for Drew; check the council again." State uncertain votes as separate
+Follow up naturally, for example: "What if Drew plays an idol on himself?" or
+"Ben's vote was actually for Drew; check the council again." State uncertain votes as separate
 what-if cases; the solver resolves explicit ballots rather than predicting people.
 
 ### Single-vote rescue rules
@@ -284,18 +352,20 @@ survivor-alliance/
 ├── uv.lock
 ├── .gitignore
 ├── .env                    # comments only; no credentials needed
-├── src/plugin/             # MCP server, vote resolver, and rescue search
+├── src/plugin/             # MCP server, fixed scenario evaluator, resolver, and searches
 ├── verifier/               # independent input and outcome checks
 ├── tests/
 │   ├── scenarios/          # task fixtures and hand-calculated expectations
 │   ├── rescues/            # hand-calculated strategic scenarios
-│   ├── advantages/         # hand-calculated idol/extra-vote/block cases
+│   ├── advantages/         # hand-calculated idol/extra-vote/block search cases
+│   ├── fixed_scenarios/    # hand-calculated fixed plays and personal outcomes
+│   ├── test_scenario.py
 │   ├── test_vote.py
 │   ├── test_rescue.py
 │   ├── test_advantages.py
 │   ├── test_ui.py
 │   └── test_verifier.py
-├── ui/                     # rescue/planning cards; schema renderer for basic councils
+├── ui/                     # fixed scenario and comparison cards; schema renderer for basic councils
 └── product/                # marketplace description and original torch icon
 ```
 
@@ -336,8 +406,8 @@ paths on your computer:
 ```yaml
 _ > nanoagent.cli.plugin.PluginRunConfig:
 plugin: /absolute/path/to/survivor-alliance
-task: alliance-survival
-arguments: /absolute/path/to/survivor-alliance/tests/scenarios/majority.input.json
+task: scenario-outcome
+arguments: /absolute/path/to/survivor-alliance/tests/fixed_scenarios/idol-on-someone-else.input.json
 inputs: []
 timeout: 60.0
 ```
@@ -355,11 +425,11 @@ milestone report.
 
 To test the rescue task, use `task: single-vote-rescue` and point `arguments` at
 `tests/rescues/save-one.input.json` in a new run config. Its hand-calculated
-expected output is alongside it. Neither task requires an API key when run this way.
+expected output is alongside it. These tool-run tasks require no API key when run this way.
 
 For the advantage task, use `task: advantage-planner` and
 `tests/advantages/two-idols-split-vote.input.json`. It also runs without a model
-key locally; ordinary-language chat uses RUSH's configured model. All three
+key locally; ordinary-language chat uses RUSH's configured model. All four
 tasks have hand-calculated fixtures and deterministic verifiers.
 
 ### Separate Git repository
@@ -397,3 +467,10 @@ task set until it is updated.
 
 Version 0.3.0 adds `advantage-planner`, its advantage guide, and before/after
 comparisons. Republish and install that version to use the new task.
+
+Version 0.4.0 makes `scenario-outcome` the default: evaluate a guessed council
+with all assumed votes and actual item plays specified. Commit and push the
+changes, then use **Publish again from GitHub** in the marketplace. A GitHub
+push alone does not publish a new RUSH version. Installations following the
+latest published version can pick it up when reopened; pinned installations
+need the marketplace Update action.

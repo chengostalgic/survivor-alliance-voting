@@ -23,7 +23,7 @@ def audit_ballots(ballots, voters, targets):
     require(all(ballot.voter != ballot.target for ballot in ballots), "self votes are forbidden")
 
 
-def reconstruct(value):
+def reconstruct(value, *, initial_ballots=None):
     """Return the unique expected typed result; reject semantically invalid inputs."""
     order = value.contestants
     roster = set(order)
@@ -41,10 +41,9 @@ def reconstruct(value):
     eligible = [name for name in order if name not in safe]
     require(bool(eligible), "no vulnerable contestants")
     audit_ballots(value.votes, order, roster - set(value.challenge_immune))
+    cast = value.votes if initial_ballots is None else initial_ballots
 
-    initial = [
-        VoteCount(name, sum(ballot.target == name and name not in safe for ballot in value.votes)) for name in order
-    ]
+    initial = [VoteCount(name, sum(ballot.target == name and name not in safe for ballot in cast)) for name in order]
     highest = max(row.votes for row in initial if row.contestant in eligible)
     initial_tied = [row.contestant for row in initial if row.contestant in eligible and row.votes == highest]
     final_candidates = initial_tied
@@ -73,7 +72,7 @@ def reconstruct(value):
         alliance_survives=all(member != loser for member in value.alliance),
         alliance_remaining=[name for name in order if name in value.alliance and name != loser],
         initial_tally=initial,
-        nullified_votes=sum(ballot.target in value.idol_protected for ballot in value.votes),
+        nullified_votes=sum(ballot.target in value.idol_protected for ballot in cast),
         revote_tally=second,
         resolution=method,
         deciding_candidates=final_candidates,

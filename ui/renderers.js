@@ -13,6 +13,50 @@ const describePlay = (play, inventory) => {
 };
 
 export default {
+  ScenarioOutput: (value, { verdict }) => {
+    if (verdict?.valid === false) {
+      return h("section", { class: "scenario" }, statusPill("Verification failed", "bad"), h("p", { text: verdict.message }));
+    }
+    const council = value.scenario.council;
+    const outcome = value.outcome;
+    const labels = {
+      not_specified: outcome.alliance_survives ? "Every alliance member stays" : "An alliance member goes home",
+      you_go_home: "You go home in this scenario",
+      ally_goes_home: "An ally goes home in this scenario",
+      alliance_safe: "You and your whole alliance stay",
+    };
+    const names = (members) => members.length ? members.join(", ") : "Nobody";
+    return h("section", { class: "scenario" },
+      h("p", { class: "muted", text: "Under your assumed votes and plays" }),
+      statusPill(labels[value.personal_outcome], outcome.alliance_survives ? "ok" : "warn", { icon: true }),
+      h("p", { class: "baseline", text: outcome.eliminated + " is eliminated under these assumptions." }),
+      h("p", { text: outcome.nullified_votes + " cast votes nullified. Whole alliance survives: " + (outcome.alliance_survives ? "Yes" : "No") + "." }),
+      dataTable({ columns: [
+        { key: "contestant", label: "Contestant", primary: true },
+        { key: "votes", label: "Counted initial votes", numeric: true },
+      ], rows: outcome.initial_tally, caption: "Votes after the specified plays" }).element,
+      outcome.revote_tally.length ? dataTable({ columns: [
+        { key: "contestant", label: "Contestant", primary: true },
+        { key: "votes", label: "Revote votes", numeric: true },
+      ], rows: outcome.revote_tally, caption: "Supplied revote" }).element : null,
+      h("p", { text: "Resolution: " + outcome.resolution + ". Final candidates: " + names(outcome.deciding_candidates) + "." }),
+      disclosure({ summary: "Check the assumed scenario", open: true },
+        h("p", { text: "Contestants: " + names(council.contestants) }),
+        h("p", { text: "Alliance: " + names(council.alliance) + ". You: " + (value.scenario.perspective ?? "Not identified") }),
+        h("p", { text: "Challenge immunity: " + names(council.challenge_immune) }),
+        dataTable({ columns: [{ key: "voter", label: "Voter" }, { key: "target", label: "Assumed ordinary vote" }], rows: council.votes, caption: "Ordinary ballots before blocks and extra votes" }).element,
+        value.scenario.plays.length ? dataTable({ columns: [
+          { key: "id", label: "Played item" }, { key: "owner", label: "Played by" },
+          { key: "kind", label: "Advantage" }, { key: "target", label: "Recipient or target" },
+        ], rows: value.scenario.plays.map((play) => ({ ...play, kind: advantageNames[play.kind] })), caption: "Only these items are played" }).element
+          : h("p", { text: "No idols or advantages are played." }),
+        h("p", { text: "Idol recipients: " + names(value.idol_recipients) + ". Blocked ordinary voters: " + names(value.blocked_voters) }),
+        h("p", { text: "Tie rule: " + council.rules.tie_rule + ". Supplied elimination priority: " + council.rules.priority_order.join(", ") }),
+        h("p", { text: "Blocks and extra votes apply to the initial round only; idols last through revotes and rocks in this declared ruleset." }),
+      ),
+      h("p", { class: "muted", text: "Verification checks the calculation for these supplied facts. It does not establish that people will actually vote or play items this way, or that the chat interpreted your description correctly." }),
+    );
+  },
   RescueOutput: (value, { verdict }) => {
     if (verdict?.valid === false) {
       return h("section", { class: "rescue" },
@@ -39,6 +83,7 @@ export default {
     const names = (members) => members.length ? members.join(", ") : "Nobody";
 
     return h("section", { class: "rescue" },
+      h("p", { class: "muted", text: "Conditional on the supplied votes, protection, and tie rules." }),
       statusPill(label, tone, { icon: true }),
       h("p", { class: "baseline", text: "Before changes: " + value.baseline.eliminated + " is eliminated." }),
       h("p", { class: "muted", text: value.tested_changes + " legal changes checked; " + value.saving_change_count + " save the whole alliance." }),
@@ -122,6 +167,7 @@ export default {
     }));
     const names = (members) => members.length ? members.join(", ") : "Nobody";
     return h("section", { class: "advantages" },
+      h("p", { class: "muted", text: "Conditional on these assumed votes and the declared alternative plays." }),
       statusPill(label, tone, { icon: true }),
       h("p", { class: "baseline", text: "No optional play: " + value.baseline.eliminated + " is eliminated. Alliance survives: " + (value.baseline.alliance_survives ? "Yes" : "No") + "." }),
       h("p", { text: needed }),

@@ -1,0 +1,119 @@
+{
+  "scenario": {
+    "council": {
+      "contestants": [
+        "Ava",
+        "Ben",
+        "Cora",
+        "Drew"
+      ],
+      "alliance": [
+        "Ava",
+        "Cora"
+      ],
+      "votes": [
+        {
+          "voter": "Ava",
+          "target": "Ben"
+        },
+        {
+          "voter": "Ben",
+          "target": "Ava"
+        },
+        {
+          "voter": "Cora",
+          "target": "Ava"
+        },
+        {
+          "voter": "Drew",
+          "target": "Ben"
+        }
+      ],
+      "challenge_immune": [],
+      "idol_protected": [],
+      "rules": {
+        "tie_rule": "revote_rocks",
+        "priority_order": [
+          "Cora",
+          "Drew",
+          "Ava",
+          "Ben"
+        ]
+      },
+      "revotes": [
+        {
+          "voter": "Cora",
+          "target": "Ava"
+        },
+        {
+          "voter": "Drew",
+          "target": "Ben"
+        }
+      ]
+    },
+    "plays": [
+      {
+        "id": "Cora-idol",
+        "owner": "Cora",
+        "kind": "idol",
+        "target": "Cora"
+      }
+    ],
+    "perspective": "Ava"
+  },
+  "outcome": {
+    "eliminated": "Drew",
+    "alliance_survives": true,
+    "alliance_remaining": [
+      "Ava",
+      "Cora"
+    ],
+    "initial_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 2
+      },
+      {
+        "contestant": "Ben",
+        "votes": 2
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 0
+      }
+    ],
+    "nullified_votes": 0,
+    "revote_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 1
+      },
+      {
+        "contestant": "Ben",
+        "votes": 1
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 0
+      }
+    ],
+    "resolution": "rocks",
+    "deciding_candidates": [
+      "Drew"
+    ]
+  },
+  "personal_outcome": "alliance_safe",
+  "idol_recipients": [
+    "Cora"
+  ],
+  "blocked_voters": [],
+  "extra_votes": []
+}

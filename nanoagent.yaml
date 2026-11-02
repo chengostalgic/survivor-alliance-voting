@@ -1,7 +1,7 @@
 _ > nanoagent.plugin.v0001.ManifestConfig:
 id: survivor-alliance
 name: Survivor Alliance
-version: 0.3.0
+version: 0.4.0
 status: ready
 spec: nanoagent.plugin/v0001
 
@@ -16,6 +16,8 @@ permissions > nanoagent.plugin.v0001.PermissionsConfig:
     write: [workspace]
 
 tools > dict[contract.Tool, nanoagent.plugin.v0001.ToolConfig]:
+  evaluate_scenario:
+    description: Calculate exactly one assumed council from fixed ordinary votes and explicit idol, extra-vote, and vote-block plays. Ownership alone gives no protection. Return who leaves, personal/alliance survival, and complete tallies; do not optimize or predict actual votes.
   resolve_vote:
     description: Resolve a Survivor-style council from supplied ballots, immunity, and explicit tie rules.
   find_rescue:
@@ -24,9 +26,45 @@ tools > dict[contract.Tool, nanoagent.plugin.v0001.ToolConfig]:
     description: Compare holding items, idols, extra votes, and vote blocks; find minimum-item saving plays and their outcomes.
 
 tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
+  scenario-outcome:
+    description: >-
+      Default task for "who goes home?", "do I go home?", or "does our alliance survive?"
+      Evaluate the user's guessed or hypothetical council assuming every supplied vote
+      and item play happens exactly as stated. Accept ordinary prose; never ask for JSON.
+      Extract the complete roster, alliance, one ordinary vote per person, challenge
+      immunity, and every item PLAYED by allies or opponents, with owner, kind, and target.
+      "Esther has an idol" means it is held and gives nobody protection. "Esther plays
+      her idol on John" protects JOHN, not Esther. Ask for the recipient if unstated;
+      never turn ownership into a play. Explicitly ask whether any other items are
+      played if the scenario does not say; "no other plays" closes that question.
+      Set council.idol_protected to [] and list all played idols in plays. An extra vote
+      adds a ballot; a vote block removes a target's ordinary initial ballot. These
+      effects apply regardless of the owner's alliance. Held items need no inventory
+      for this task. Use perspective for the user's named alliance member, or null
+      if unidentified; do not ask their identity unless a personal answer is needed.
+      Ask only for missing essential facts or explicit tie rules, preserving facts
+      already supplied. Never invent ballots, plays, revotes, or a rock-draw order.
+      Once complete, CALL THIS TASK instead of calculating an unverified answer in chat.
+      State outcomes as "Under these assumed votes and plays, ...". A valid result
+      certifies the calculation, not the likelihood of these assumptions or the chat's
+      prose interpretation. Do not search for alternative plays unless requested.
+    runner: tool
+    tools: [evaluate_scenario]
+    reference: null
+    instructions: >-
+      Apply only the listed plays to the fixed ordinary ballots. Each item is used
+      once; idol ownership and protected recipient are different fields. Blocks remove
+      ordinary initial ballots, including those of immune voters, but not added extra
+      ballots. Extra votes and blocks affect the initial round only; supplied revotes
+      follow the declared council rules. Idol protection lasts through revotes and rocks.
+      Return the interpreted scenario, full outcome, personal outcome when specified,
+      protected recipients, blocked voters, and extra ballots. A correct result where
+      the user or an ally goes home must pass verification just like a safe result.
   alliance-survival:
     description: >-
-      Does every alliance member survive this vote? Convert the user's plain-language
+      Legacy ordinary-ballot calculation; prefer scenario-outcome for chat questions
+      about a specified council and actual assumed item plays. Does every alliance
+      member survive these assumed votes? Convert the user's plain-language
       scenario into the typed council input; expand grouped votes and preserve names.
       Ask for any missing roster, alliance, ballots, immunity, or tie rules. Never
       invent ballots or a tie priority. The user does not need to write JSON.
@@ -40,7 +78,8 @@ tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
       member remains. Reject inconsistent scenarios rather than inventing missing votes.
   single-vote-rescue:
     description: >-
-      Can one alliance member changing their initial vote save the entire alliance?
+      Only when the user explicitly asks to compare changed votes: can one alliance
+      member changing their assumed initial vote save the entire alliance?
       Convert the user's plain-language scenario into council facts; expand grouped
       votes. Ask for missing ballots, immunity, and an explicit priority tie order;
       never invent these. This search requires tie_rule priority and no revotes.
@@ -57,7 +96,9 @@ tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
       a multi-vote rescue or a rescue requiring different immunity or tie rules.
   advantage-planner:
     description: >-
-      Do we need to play an idol or advantage, and what happens if we do?
+      Only when the user explicitly requests alternative item plays or asks whether
+      to spend an item: do we need to play an idol or advantage under these assumed votes?
+      For a fixed list of plays and "who goes home?", use scenario-outcome instead.
       Extract known intended ordinary ballots and up to three usable alliance-owned
       items from ordinary chat. Held idols belong in inventory; only already-played
       idols go in council.idol_protected. Ask for missing facts, inventory, or tie
