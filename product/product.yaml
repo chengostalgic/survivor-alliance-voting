@@ -1,13 +1,15 @@
 _ > nanoagent.plugin.v0001.ProductConfig:
-tagline: "Find out whether your whole alliance survives tribal council."
+tagline: "Play the idol, use a vote advantage, or keep your items?"
 summary: >-
-  Supply a cast, alliance, ballots, immunity, and a tie policy. Survivor Alliance
-  resolves one Survivor-style council and checks the outcome against every vote.
+  Describe the known votes and your available advantages in chat. Compare doing
+  nothing, playing idols, adding votes, and blocking votes. Find which plays save
+  the whole alliance and how many items they cost, with verified vote outcomes.
 highlights:
-  - "See counted votes and ballots nullified by idols."
-  - "Resolve revotes and rock deadlocks with an explicit priority order."
-  - "Know exactly who leaves and which alliance members remain."
+  - "Explain the council and available items in ordinary language."
+  - "Compare idols, extra votes, vote blocks, and keeping your items."
+  - "Find plans using the fewest items, or explore a single changed vote."
+  - "Inspect the interpreted facts, before/after tallies, and verified outcomes."
 steps:
-  - "Provide the contestants, alliance members, and one ballot per contestant."
-  - "Declare immunity, a tie policy, priority order, and any required revote ballots."
-  - "Read the eliminated contestant, vote totals, and verified alliance result."
+  - "Describe your cast, alliance, intended votes, immunity, and tie rules."
+  - "List your usable items and ask whether anything needs to be played."
+  - "Compare the baseline and alternatives, including who leaves after each play."

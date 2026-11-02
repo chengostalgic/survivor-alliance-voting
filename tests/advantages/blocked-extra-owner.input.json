@@ -1,0 +1,68 @@
+{
+  "council": {
+    "contestants": [
+      "Ava",
+      "Ben",
+      "Cora",
+      "Drew",
+      "Eli"
+    ],
+    "alliance": [
+      "Ava",
+      "Ben"
+    ],
+    "votes": [
+      {
+        "voter": "Ava",
+        "target": "Drew"
+      },
+      {
+        "voter": "Ben",
+        "target": "Ava"
+      },
+      {
+        "voter": "Cora",
+        "target": "Ava"
+      },
+      {
+        "voter": "Drew",
+        "target": "Ava"
+      },
+      {
+        "voter": "Eli",
+        "target": "Drew"
+      }
+    ],
+    "challenge_immune": [],
+    "idol_protected": [],
+    "rules": {
+      "tie_rule": "priority",
+      "priority_order": [
+        "Drew",
+        "Ava",
+        "Ben",
+        "Cora",
+        "Eli"
+      ]
+    },
+    "revotes": []
+  },
+  "inventory": [
+    {
+      "id": "Ava-block",
+      "owner": "Ava",
+      "kind": "vote_block",
+      "allowed_targets": [
+        "Ben"
+      ]
+    },
+    {
+      "id": "Ben-extra",
+      "owner": "Ben",
+      "kind": "extra_vote",
+      "allowed_targets": [
+        "Ava"
+      ]
+    }
+  ]
+}

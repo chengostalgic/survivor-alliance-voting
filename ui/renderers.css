@@ -1,1 +1,20 @@
-/* Council results use the host's standard schema renderer. */
+.rescue, .advantages {
+  display: grid;
+  gap: 14px;
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+.rescue > .pill, .advantages > .pill {
+  justify-self: start;
+}
+
+.rescue .baseline, .advantages .baseline {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.rescue .disclosure-body, .advantages .disclosure-body, .advantages .plan-detail {
+  display: grid;
+  gap: 10px;
+}

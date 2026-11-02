@@ -1,7 +1,7 @@
 _ > nanoagent.plugin.v0001.ManifestConfig:
 id: survivor-alliance
 name: Survivor Alliance
-version: 0.1.0
+version: 0.3.0
 status: ready
 spec: nanoagent.plugin/v0001
 
@@ -18,10 +18,18 @@ permissions > nanoagent.plugin.v0001.PermissionsConfig:
 tools > dict[contract.Tool, nanoagent.plugin.v0001.ToolConfig]:
   resolve_vote:
     description: Resolve a Survivor-style council from supplied ballots, immunity, and explicit tie rules.
+  find_rescue:
+    description: Check every legal initial-vote change by one alliance member and find moves that save the whole alliance.
+  plan_advantages:
+    description: Compare holding items, idols, extra votes, and vote blocks; find minimum-item saving plays and their outcomes.
 
 tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
   alliance-survival:
-    description: Does every member of your alliance survive this Survivor-style vote?
+    description: >-
+      Does every alliance member survive this vote? Convert the user's plain-language
+      scenario into the typed council input; expand grouped votes and preserve names.
+      Ask for any missing roster, alliance, ballots, immunity, or tie rules. Never
+      invent ballots or a tie priority. The user does not need to write JSON.
     runner: tool
     tools: [resolve_vote]
     reference: null
@@ -30,3 +38,47 @@ tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
       contestant, complete counted tallies, nullified vote count, resolution method,
       deciding candidates, and remaining alliance. Survival means every alliance
       member remains. Reject inconsistent scenarios rather than inventing missing votes.
+  single-vote-rescue:
+    description: >-
+      Can one alliance member changing their initial vote save the entire alliance?
+      Convert the user's plain-language scenario into council facts; expand grouped
+      votes. Ask for missing ballots, immunity, and an explicit priority tie order;
+      never invent these. This search requires tie_rule priority and no revotes.
+      Return the exhaustive search and show the interpreted council for the user to check.
+    runner: tool
+    tools: [find_rescue]
+    reference: null
+    instructions: >-
+      Resolve the baseline. If the alliance already survives, report already_safe
+      with zero changes tested. Otherwise try every legal initial-vote change by
+      exactly one alliance member, holding all other facts fixed. Ties use the
+      explicit priority order. Count all saving changes and return the first five
+      in roster voter/target order, including each complete outcome. Never claim
+      a multi-vote rescue or a rescue requiring different immunity or tie rules.
+  advantage-planner:
+    description: >-
+      Do we need to play an idol or advantage, and what happens if we do?
+      Extract known intended ordinary ballots and up to three usable alliance-owned
+      items from ordinary chat. Held idols belong in inventory; only already-played
+      idols go in council.idol_protected. Ask for missing facts, inventory, or tie
+      priority. Use priority ties and no revotes. Compare no play, all singles, and
+      all pairs. Honor stated target restrictions; otherwise idols may target anyone,
+      extra votes any legal vote target, and vote blocks anyone except their owner.
+      In this ruleset, idols nullify ordinary and extra votes against their recipient.
+      An extra ballot survives its owner's ordinary vote being blocked; a vote block
+      removes only the ordinary ballot, once. Explain these rules for informational
+      questions without inventing a council or implying they cover every season.
+      Describe the interpreted facts and the fewest-item saving plans; never claim
+      predictions about how other people react or plans using more than two items.
+    runner: tool
+    tools: [plan_advantages]
+    reference: null
+    instructions: >-
+      Hold the ordinary intended ballots fixed. A vote block removes only its target's
+      original ballot, once. An extra vote adds a separate ballot from its owner even
+      if the owner's original ballot is blocked. Idols protect a recipient from all
+      counted ballots, including extra votes. Items are single-use and at most two
+      distinct items may be played per candidate plan. Compare every legal plan;
+      minimize item count, not assumed future strategic value. Return all single-play
+      summaries and the first five minimum-item saving plans with full outcomes.
+      Explain that no_saving_plan applies only to this declared two-item search.

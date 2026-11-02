@@ -1,0 +1,57 @@
+{
+  "contestants": [
+    "Ava",
+    "Ben",
+    "Cora",
+    "Drew",
+    "Eli",
+    "Finn"
+  ],
+  "alliance": [
+    "Ava",
+    "Ben",
+    "Cora",
+    "Eli",
+    "Finn"
+  ],
+  "votes": [
+    {
+      "voter": "Ava",
+      "target": "Drew"
+    },
+    {
+      "voter": "Ben",
+      "target": "Ava"
+    },
+    {
+      "voter": "Cora",
+      "target": "Ava"
+    },
+    {
+      "voter": "Drew",
+      "target": "Ava"
+    },
+    {
+      "voter": "Eli",
+      "target": "Drew"
+    },
+    {
+      "voter": "Finn",
+      "target": "Drew"
+    }
+  ],
+  "challenge_immune": [],
+  "idol_protected": [],
+  "rules": {
+    "tie_rule": "priority",
+    "priority_order": [
+      "Ava",
+      "Ben",
+      "Cora",
+      "Drew",
+      "Eli",
+      "Finn"
+    ]
+  },
+  "revotes": []
+}

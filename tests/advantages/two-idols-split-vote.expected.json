@@ -1,0 +1,418 @@
+{
+  "scenario": {
+    "council": {
+      "contestants": [
+        "Ava",
+        "Ben",
+        "Cora",
+        "Drew",
+        "Eli",
+        "Finn",
+        "Gia"
+      ],
+      "alliance": [
+        "Ava",
+        "Ben"
+      ],
+      "votes": [
+        {
+          "voter": "Ava",
+          "target": "Cora"
+        },
+        {
+          "voter": "Ben",
+          "target": "Cora"
+        },
+        {
+          "voter": "Cora",
+          "target": "Ava"
+        },
+        {
+          "voter": "Drew",
+          "target": "Ava"
+        },
+        {
+          "voter": "Eli",
+          "target": "Ava"
+        },
+        {
+          "voter": "Finn",
+          "target": "Ben"
+        },
+        {
+          "voter": "Gia",
+          "target": "Ben"
+        }
+      ],
+      "challenge_immune": [],
+      "idol_protected": [],
+      "rules": {
+        "tie_rule": "priority",
+        "priority_order": [
+          "Ava",
+          "Ben",
+          "Cora",
+          "Drew",
+          "Eli",
+          "Finn",
+          "Gia"
+        ]
+      },
+      "revotes": []
+    },
+    "inventory": [
+      {
+        "id": "Ava-idol",
+        "owner": "Ava",
+        "kind": "idol",
+        "allowed_targets": [
+          "Ava",
+          "Ben"
+        ]
+      },
+      {
+        "id": "Ben-idol",
+        "owner": "Ben",
+        "kind": "idol",
+        "allowed_targets": [
+          "Ava",
+          "Ben"
+        ]
+      }
+    ]
+  },
+  "baseline": {
+    "eliminated": "Ava",
+    "alliance_survives": false,
+    "alliance_remaining": [
+      "Ben"
+    ],
+    "initial_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 3
+      },
+      {
+        "contestant": "Ben",
+        "votes": 2
+      },
+      {
+        "contestant": "Cora",
+        "votes": 2
+      },
+      {
+        "contestant": "Drew",
+        "votes": 0
+      },
+      {
+        "contestant": "Eli",
+        "votes": 0
+      },
+      {
+        "contestant": "Finn",
+        "votes": 0
+      },
+      {
+        "contestant": "Gia",
+        "votes": 0
+      }
+    ],
+    "nullified_votes": 0,
+    "revote_tally": [],
+    "resolution": "initial_vote",
+    "deciding_candidates": [
+      "Ava"
+    ]
+  },
+  "decision": "play",
+  "minimum_items_needed": 2,
+  "plans_checked": 9,
+  "saving_plan_count": 2,
+  "minimal_saving_plan_count": 2,
+  "recommendations": [
+    {
+      "plays": [
+        {
+          "item_id": "Ava-idol",
+          "target": "Ava"
+        },
+        {
+          "item_id": "Ben-idol",
+          "target": "Ben"
+        }
+      ],
+      "outcome": {
+        "eliminated": "Cora",
+        "alliance_survives": true,
+        "alliance_remaining": [
+          "Ava",
+          "Ben"
+        ],
+        "initial_tally": [
+          {
+            "contestant": "Ava",
+            "votes": 0
+          },
+          {
+            "contestant": "Ben",
+            "votes": 0
+          },
+          {
+            "contestant": "Cora",
+            "votes": 2
+          },
+          {
+            "contestant": "Drew",
+            "votes": 0
+          },
+          {
+            "contestant": "Eli",
+            "votes": 0
+          },
+          {
+            "contestant": "Finn",
+            "votes": 0
+          },
+          {
+            "contestant": "Gia",
+            "votes": 0
+          }
+        ],
+        "nullified_votes": 5,
+        "revote_tally": [],
+        "resolution": "initial_vote",
+        "deciding_candidates": [
+          "Cora"
+        ]
+      },
+      "reason": ""
+    },
+    {
+      "plays": [
+        {
+          "item_id": "Ava-idol",
+          "target": "Ben"
+        },
+        {
+          "item_id": "Ben-idol",
+          "target": "Ava"
+        }
+      ],
+      "outcome": {
+        "eliminated": "Cora",
+        "alliance_survives": true,
+        "alliance_remaining": [
+          "Ava",
+          "Ben"
+        ],
+        "initial_tally": [
+          {
+            "contestant": "Ava",
+            "votes": 0
+          },
+          {
+            "contestant": "Ben",
+            "votes": 0
+          },
+          {
+            "contestant": "Cora",
+            "votes": 2
+          },
+          {
+            "contestant": "Drew",
+            "votes": 0
+          },
+          {
+            "contestant": "Eli",
+            "votes": 0
+          },
+          {
+            "contestant": "Finn",
+            "votes": 0
+          },
+          {
+            "contestant": "Gia",
+            "votes": 0
+          }
+        ],
+        "nullified_votes": 5,
+        "revote_tally": [],
+        "resolution": "initial_vote",
+        "deciding_candidates": [
+          "Cora"
+        ]
+      },
+      "reason": ""
+    }
+  ],
+  "single_plays": [
+    {
+      "play": {
+        "item_id": "Ava-idol",
+        "target": "Ava"
+      },
+      "owner": "Ava",
+      "kind": "idol",
+      "eliminated": "Ben",
+      "alliance_survives": false,
+      "nullified_votes": 3,
+      "vote_tally": [
+        {
+          "contestant": "Ava",
+          "votes": 0
+        },
+        {
+          "contestant": "Ben",
+          "votes": 2
+        },
+        {
+          "contestant": "Cora",
+          "votes": 2
+        },
+        {
+          "contestant": "Drew",
+          "votes": 0
+        },
+        {
+          "contestant": "Eli",
+          "votes": 0
+        },
+        {
+          "contestant": "Finn",
+          "votes": 0
+        },
+        {
+          "contestant": "Gia",
+          "votes": 0
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "play": {
+        "item_id": "Ava-idol",
+        "target": "Ben"
+      },
+      "owner": "Ava",
+      "kind": "idol",
+      "eliminated": "Ava",
+      "alliance_survives": false,
+      "nullified_votes": 2,
+      "vote_tally": [
+        {
+          "contestant": "Ava",
+          "votes": 3
+        },
+        {
+          "contestant": "Ben",
+          "votes": 0
+        },
+        {
+          "contestant": "Cora",
+          "votes": 2
+        },
+        {
+          "contestant": "Drew",
+          "votes": 0
+        },
+        {
+          "contestant": "Eli",
+          "votes": 0
+        },
+        {
+          "contestant": "Finn",
+          "votes": 0
+        },
+        {
+          "contestant": "Gia",
+          "votes": 0
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "play": {
+        "item_id": "Ben-idol",
+        "target": "Ava"
+      },
+      "owner": "Ben",
+      "kind": "idol",
+      "eliminated": "Ben",
+      "alliance_survives": false,
+      "nullified_votes": 3,
+      "vote_tally": [
+        {
+          "contestant": "Ava",
+          "votes": 0
+        },
+        {
+          "contestant": "Ben",
+          "votes": 2
+        },
+        {
+          "contestant": "Cora",
+          "votes": 2
+        },
+        {
+          "contestant": "Drew",
+          "votes": 0
+        },
+        {
+          "contestant": "Eli",
+          "votes": 0
+        },
+        {
+          "contestant": "Finn",
+          "votes": 0
+        },
+        {
+          "contestant": "Gia",
+          "votes": 0
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "play": {
+        "item_id": "Ben-idol",
+        "target": "Ben"
+      },
+      "owner": "Ben",
+      "kind": "idol",
+      "eliminated": "Ava",
+      "alliance_survives": false,
+      "nullified_votes": 2,
+      "vote_tally": [
+        {
+          "contestant": "Ava",
+          "votes": 3
+        },
+        {
+          "contestant": "Ben",
+          "votes": 0
+        },
+        {
+          "contestant": "Cora",
+          "votes": 2
+        },
+        {
+          "contestant": "Drew",
+          "votes": 0
+        },
+        {
+          "contestant": "Eli",
+          "votes": 0
+        },
+        {
+          "contestant": "Finn",
+          "votes": 0
+        },
+        {
+          "contestant": "Gia",
+          "votes": 0
+        }
+      ],
+      "reason": ""
+    }
+  ]
+}

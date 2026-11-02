@@ -1,0 +1,90 @@
+{
+  "council": {
+    "contestants": [
+      "Ava",
+      "Ben",
+      "Cora",
+      "Drew",
+      "Eli"
+    ],
+    "alliance": [
+      "Ava",
+      "Ben"
+    ],
+    "votes": [
+      {
+        "voter": "Ava",
+        "target": "Drew"
+      },
+      {
+        "voter": "Ben",
+        "target": "Drew"
+      },
+      {
+        "voter": "Cora",
+        "target": "Drew"
+      },
+      {
+        "voter": "Drew",
+        "target": "Ava"
+      },
+      {
+        "voter": "Eli",
+        "target": "Ava"
+      }
+    ],
+    "challenge_immune": [],
+    "idol_protected": [],
+    "rules": {
+      "tie_rule": "priority",
+      "priority_order": [
+        "Ava",
+        "Ben",
+        "Cora",
+        "Drew",
+        "Eli"
+      ]
+    },
+    "revotes": []
+  },
+  "baseline": {
+    "eliminated": "Drew",
+    "alliance_survives": true,
+    "alliance_remaining": [
+      "Ava",
+      "Ben"
+    ],
+    "initial_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 2
+      },
+      {
+        "contestant": "Ben",
+        "votes": 0
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 3
+      },
+      {
+        "contestant": "Eli",
+        "votes": 0
+      }
+    ],
+    "nullified_votes": 0,
+    "revote_tally": [],
+    "resolution": "initial_vote",
+    "deciding_candidates": [
+      "Drew"
+    ]
+  },
+  "status": "already_safe",
+  "tested_changes": 0,
+  "saving_change_count": 0,
+  "suggestions": []
+}
