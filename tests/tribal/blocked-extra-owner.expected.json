@@ -1,0 +1,107 @@
+{
+  "scenario": {
+    "council": {
+      "contestants": [
+        "John",
+        "Esther",
+        "Cora",
+        "Drew",
+        "Eli"
+      ],
+      "alliance": [
+        "John",
+        "Esther"
+      ],
+      "votes": [
+        {
+          "voter": "John",
+          "target": "Drew"
+        },
+        {
+          "voter": "Esther",
+          "target": "Drew"
+        },
+        {
+          "voter": "Cora",
+          "target": "John"
+        },
+        {
+          "voter": "Drew",
+          "target": "John"
+        },
+        {
+          "voter": "Eli",
+          "target": "John"
+        }
+      ],
+      "challenge_immune": [],
+      "revotes": [],
+      "format": null
+    },
+    "plays": [
+      {
+        "id": "Cora-block",
+        "owner": "Cora",
+        "kind": "vote_block",
+        "target": "Esther"
+      },
+      {
+        "id": "Esther-extra",
+        "owner": "Esther",
+        "kind": "extra_vote",
+        "target": "Drew"
+      }
+    ],
+    "perspective": "John",
+    "resolution_facts": null
+  },
+  "outcome": {
+    "stage": "complete",
+    "eliminated": "John",
+    "alliance_survives": false,
+    "alliance_remaining": [
+      "Esther"
+    ],
+    "initial_tally": [
+      {
+        "contestant": "John",
+        "votes": 3
+      },
+      {
+        "contestant": "Esther",
+        "votes": 0
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 2
+      },
+      {
+        "contestant": "Eli",
+        "votes": 0
+      }
+    ],
+    "nullified_votes": 0,
+    "revote_tally": [],
+    "resolution": "initial_vote",
+    "tied_contestants": [],
+    "revote_voters": [],
+    "rock_drawers": [],
+    "fire_contestants": [],
+    "needed_facts": []
+  },
+  "personal_outcome": "you_go_home",
+  "idol_recipients": [],
+  "blocked_voters": [
+    "Esther"
+  ],
+  "extra_votes": [
+    {
+      "voter": "Esther",
+      "target": "Drew"
+    }
+  ]
+}

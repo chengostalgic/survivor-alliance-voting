@@ -1,15 +1,10 @@
 """Deterministic entry points; no dependency on the tool implementation."""
 
-from . import advantages, rescue, scenario, vote
+from . import tribal
 from .vote import verdict
 
-TOOLS = {"evaluate_scenario": scenario, "resolve_vote": vote, "find_rescue": rescue, "plan_advantages": advantages}
-TASKS = {
-    "scenario-outcome": scenario,
-    "alliance-survival": vote,
-    "single-vote-rescue": rescue,
-    "advantage-planner": advantages,
-}
+TOOLS = {"resolve_tribal": tribal}
+TASKS = {"scenario-outcome": tribal}
 
 
 def verify_input(tool, value):

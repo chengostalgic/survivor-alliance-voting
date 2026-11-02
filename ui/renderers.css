@@ -1,20 +1,20 @@
-.rescue, .advantages, .scenario {
+.scenario {
   display: grid;
   gap: 14px;
   color: var(--text);
   font-family: var(--sans);
 }
 
-.rescue > .pill, .advantages > .pill, .scenario > .pill {
+.scenario > .pill {
   justify-self: start;
 }
 
-.rescue .baseline, .advantages .baseline, .scenario .baseline {
+.scenario .baseline {
   font-size: 16px;
   font-weight: 600;
 }
 
-.rescue .disclosure-body, .advantages .disclosure-body, .advantages .plan-detail, .scenario .disclosure-body {
+.scenario .disclosure-body {
   display: grid;
   gap: 10px;
 }

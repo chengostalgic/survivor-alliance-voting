@@ -4,7 +4,7 @@
 
 Evaluate one fully specified hypothetical Survivor-style council. Supply who is
 voting for whom, every idol and advantage being played, challenge immunity, and
-explicit tie rules. The plugin calculates who leaves, whether it is you or an
+the council format when at the final four. The plugin calculates who leaves, whether it is you or an
 ally, and whether every alliance member stays. Describe it in ordinary chat;
 you do not need to prepare JSON.
 
@@ -23,19 +23,13 @@ dataset, or LLM.
 
 | Tool | Input → output | Purpose |
 |---|---|---|
-| `evaluate_scenario` | `ScenarioInput` → `ScenarioOutput` | Evaluate one fixed assumed council, including explicit allied or opposing item plays and your personal outcome. |
-| `resolve_vote` | `CouncilInput` → `CouncilOutput` | Resolve the complete supplied council under the rules below. |
-| `find_rescue` | `CouncilInput` → `RescueOutput` | Check every legal initial-vote change by one alliance member and find saving moves. |
-| `plan_advantages` | `AdvantageInput` → `AdvantageOutput` | Compare holding items, idols, extra votes, and vote blocks; find plays using the fewest items. |
+| `resolve_tribal` | `TribalScenarioInput` → `TribalScenarioOutput` | Main evaluator: vote, revote, deadlock/rocks, or final-four fire; unresolved results remain pending. |
 
 ### Tasks
 
 | Task | Runner | Purpose |
 |---|---|---|
-| `scenario-outcome` | `tool`, calling `evaluate_scenario` | Default chat task: calculate who leaves under the supplied votes and plays. |
-| `alliance-survival` | `tool`, calling `resolve_vote` | Determine whether every alliance member remains after the vote. |
-| `single-vote-rescue` | `tool`, calling `find_rescue` | Find whether a single alliance ballot can save everyone, using an explicit priority tie rule. |
-| `advantage-planner` | `tool`, calling `plan_advantages` | Decide whether an optional advantage is needed and compare its resulting vote outcomes. |
+| `scenario-outcome` | `tool`, calling `resolve_tribal` | Default: supported Survivor vote/revote/rocks or final-four formats, without any priority order. |
 
 The tool runner makes local task execution reproducible without model credentials.
 RUSH's chat can invoke this task. The plugin does not predict votes or ask an
@@ -43,7 +37,7 @@ agent to invent missing ballots.
 
 ### Evaluate a guessed scenario in ordinary chat
 
-Paste this into the installed plugin's chat:
+Paste this into the updated plugin's chat:
 
 ```text
 Evaluate this hypothetical council. I am John.
@@ -52,293 +46,94 @@ Our alliance is John and Esther.
 Assume John and Esther vote for Drew. Cora, Drew, and Eli vote for John.
 Nobody has challenge immunity.
 Esther plays her idol, Esther-idol, on John. No other idols or advantages are played.
-For this hypothetical, no revote: eliminate the first tied contestant in this
-order: John, Esther, Cora, Drew, Eli.
 Under exactly these assumptions, who goes home? Does our alliance survive?
 ```
 
 John's three votes are nullified. Drew leaves with two counted votes, so John
-and Esther both stay. Esther owns the idol; **John is its protected recipient**.
+and Esther both stay. Esther owns the idol; **John is the protected recipient**.
+If Esther instead keeps the idol and nobody plays anything, John goes home 3–2.
+Both are correct calculations, and both pass verification.
 
-Then try: "Keep the same votes and rules, but Esther holds her idol and nobody
-plays any item." John now leaves 3–2. The correct personal result is
-`you_go_home`, and the verifier still returns a valid score of 1. Identifying
-yourself as Esther instead makes the same elimination `ally_goes_home`.
+**Vote order never matters.** The input has no custom tiebreak policy. Listing ballots or contestants in a different order cannot
+choose a different loser. Roster order controls display only.
 
-The task accepts all **0–24 explicitly played items**, including opponents'
-items. It does not search for better plays. Held items have no effect and need
-no inventory. State "no items are played" or "no other plays" so the chat does
-not have to ask whether any additional effects are missing. "Esther has an
-idol" alone gives no protection; a play requires its recipient.
+The main task follows these stages:
 
-`ScenarioInput` contains `council`, `plays`, and `perspective` (a named alliance
-member, or null when unidentified). Each play supplies a unique item `id`, an
-`owner`, a `kind`, and a `target`. For this task, `council.idol_protected` stays
-empty; **every** played idol is listed explicitly in `plays`.
+1. Count the ordinary votes after the stated plays. A unique leader leaves.
+2. On a tie, **tied contestants do not revote**. Other contestants vote only for
+   those tied. If revote ballots were not supplied, return `revote_required`
+   and list eligible revoters; do not invent their decisions.
+3. A unique revote leader leaves. After a continued standard deadlock, a stated
+   unanimous decision can eliminate a still-tied contestant. Otherwise the
+   non-tied, non-protected contestants are eligible for rocks. A missing
+   decision/draw result returns `deadlock` with the eligible drawers and a null
+   elimination. If the user explicitly assumes a rock loser, validate eligibility
+   and use that supplied result. Never predict a random draw.
+4. The **final four is a separate format**. `final_four_vote` uses voting and a
+   revote, followed by fire between two still-tied contestants. `final_four_fire`
+   is the forced-fire format: no vote, with a supplied pair making fire. A missing
+   pair or winner returns `fire_required`; only an explicitly supplied actual or
+   assumed winner resolves the elimination. Four contestants at an ordinary
+   tribe do not automatically mean the final four.
 
-The declared effects are:
+The standard deadlock procedure is illustrated in an [official Paramount+
+recap](https://www.paramountplus.com/sneak-peak/survivor-season-51-episode-5-recap/).
+CBS describes the immunity winner's choice of finalists and fire competitors in
+its [final-four challenge clip](https://www.cbs.com/shows/video/ALVE01KS8N4ZMZE1SS4TX0JEJDFY6A/).
+The plugin explicitly supports the formats above; it does not infer every
+season's rules merely from roster size.
 
-- An idol nullifies ordinary and extra votes against its **recipient**. Protection
-  lasts through the supplied revote and rock rules. It does not protect its owner
-  unless the owner is the recipient.
-- A vote block removes its target's ordinary **initial** ballot, once. It can
-  target a challenge-immune voter. It does not remove an extra ballot.
-- An extra vote adds a separate initial ballot from the owner, including when
-  that owner's ordinary ballot is blocked. It cannot target its owner or a
-  challenge-immune contestant. Extra votes may be nullified by idols.
-- Blocks and extra votes affect the initial round only. Supplied revotes follow
-  the council rules below, so a blocked initial voter can vote in a revote.
-  This is an explicit reproducible variant, not every television season.
-
-`ScenarioOutput` echoes the assumptions and contains the complete `outcome`,
-`personal_outcome` (`you_go_home`, `ally_goes_home`, `alliance_safe`, or
-`not_specified`), `idol_recipients`, `blocked_voters`, and `extra_votes`. Its card
-shows the assumed facts and states the result conditionally. An independent
-verifier checks all six fields, including the personal result and the full
-initial/revote tallies. No prediction or LLM judge is involved.
-
-Tie rules must still be explicit. A deterministic priority or rock order is a
-hypothetical input; it does not predict a random draw. Missing ballots, item
-targets, and essential tie facts require clarification, rather than guesses.
-
-### Optional: compare a different vote
-
-You do not have to write JSON. RUSH's chat model converts your description into
-the typed task input. For example, paste this into the installed plugin's chat:
+For a final-four example, say:
 
 ```text
-Can one of us changing our vote save our alliance?
-
-The contestants are Ava, Ben, Cora, Drew, and Eli.
-My alliance is Ava and Ben.
-Ava and Eli vote for Drew. Ben, Cora, and Drew vote for Ava.
-Nobody has challenge immunity, and no idols are played.
-Resolve ties without a revote: the first tied contestant in this order leaves:
-Ava, Ben, Cora, Drew, Eli.
+We are at the final four using the forced fire-making format, not a vote.
+The contestants are Ava, Ben, Cora, and Drew. I am Ava; Cora is my ally.
+Ben and Cora make fire. Assume Ben wins. No advantages are played.
 ```
 
-The baseline eliminates Ava, with three votes against Ava and two against Drew.
-The search checks six legal changes and finds one saving move: **Ben changes his
-vote from Ava to Drew**. Drew then leaves 3–2, and both alliance members remain.
+The result eliminates Cora by fire, so an ally goes home. Omitting "Assume Ben
+wins" leaves the result pending; a verifier can confirm that the correct answer
+is unresolved without pretending to know challenge performance.
 
-The rescue result displays the interpreted roster, alliance, ballots, immunity,
-and priority order. Check these facts against what you meant. If a fact or tie
-rule is missing, the task descriptions tell the chat model to ask rather than
-invent it. The verifier checks the typed facts, not the meaning of arbitrary
-English; language interpretation is performed by the chat model and can be
-mistaken. RUSH chat uses its configured model/key; the local Python tasks and
-their tests make no model calls.
+#### Main input and verification
 
-Follow up naturally, for example: "What if Drew plays an idol on himself?" or
-"Ben's vote was actually for Drew; check the council again." State uncertain votes as separate
-what-if cases; the solver resolves explicit ballots rather than predicting people.
+`TribalScenarioInput` has `council`, `plays`, `perspective`, and
+`resolution_facts`. The chat model constructs these internally. The council has
+`contestants`, `alliance`, ordinary `votes`, `challenge_immune`, `format` (null
+means standard), and `revotes` ([] when unknown/unused). Every played item has
+an `id`, `owner`, `kind`, and `target`; held items have no effect. The owner can
+be an opponent. A perspective is a named alliance member, or null if unidentified.
 
-### Single-vote rescue rules
+Use `resolution_facts: null` unless a later decision/result was stated. Its
+fields are `consensus_eliminated`, `rock_draw_loser`, `fire_participants` (two
+names or []), and `fire_winner`; unknown names are null. Supplying a random
+result is an additional scenario assumption, not an ordering of ballots.
 
-The original council rules below apply. For this strategic task:
+`TribalScenarioOutput` echoes the scenario, complete tallies, nullified votes,
+protected recipients, removed ordinary voters, and added ballots. Its `outcome`
+contains `stage`, nullable `eliminated`, nullable `alliance_survives`, nullable
+`alliance_remaining`, `initial_tally`, `nullified_votes`, `revote_tally`, nullable
+`resolution`, `tied_contestants`, `revote_voters`, `rock_drawers`,
+`fire_contestants`, and `needed_facts`. Personal outcomes include
+`awaiting_result` alongside the definite safe/losing results.
 
-1. `tie_rule` must be `priority`, with the user's explicit `priority_order`, and
-   `revotes` must be empty. A changed initial vote could create a different revote
-   requiring new ballots, so this search requires a complete deterministic tie
-   policy instead of guessing those ballots.
-2. Resolve the baseline first. If everyone is already safe, return
-   `status: already_safe`, zero tested changes, zero saving changes, and no
-   suggestions: no rescue is needed.
-3. Otherwise, independently try every legal alternative target for every
-   **alliance member's** initial ballot. Change exactly that ballot. Keep the
-   other ballots, alliance, immunity, and priority order fixed. Exclude self
-   votes, challenge-immune targets, and the ballot's original target. A vote
-   against an idol-protected contestant is legal and can be nullified.
-4. A move saves the alliance exactly when its new outcome eliminates no alliance
-   member. Return `rescuable` if at least one exists, or `impossible` if none does.
-   The latter means no single-vote rescue under these supplied rules.
-5. `tested_changes` counts every legal alternative, and `saving_change_count`
-   counts every saving alternative. Return the first **five** saving moves in
-   roster voter/target order, each with its complete council outcome. These are
-   verified moves, not a ranking of strategic preferences or probabilities.
+The independent verifier checks every returned field. Correct pending and losing
+results receive a valid score of 1. The runtime never rolls dice or guesses fire
+winners. It counts with a Counter; the verifier independently scans every
+candidate's ballots. Neither imports the other's solver.
 
-`RescueOutput` includes `council` (the interpreted facts), `baseline`, `status`,
-`tested_changes`, `saving_change_count`, and `suggestions`. Its verifier runs its
-own exhaustive search; it rejects false claims that no rescue exists, omitted or
-invented moves, altered outcomes, incorrect counts, and reordered suggestions.
+The major behavioral limitation still applies: alliance labels, votes, item
+plays, and any supplied draw/challenge result are assumed to happen exactly as
+described. The verifier certifies conditional arithmetic and stage handling,
+not loyalty, future behavior, or arbitrary prose interpretation. The result card
+shows the interpreted facts for checking.
 
-### Should you play an advantage?
-
-The planner answers: **given these intended votes and this available inventory,
-do we need to spend anything to keep the whole alliance safe?** It compares no
-optional play, every allowed single-item play, and every allowed two-item
-combination. It counts all saving plans and shows the first five that use the
-fewest items. Every single-item alternative includes its vote totals, eliminated
-contestant, alliance result, and nullified votes, including wasteful or harmful plays.
-
-Try this in chat:
-
-```text
-Should we play our idols, and who should we protect?
-
-The cast is Ava, Ben, Cora, Drew, Eli, Finn, and Gia. Our alliance is Ava and Ben.
-Ava and Ben vote for Cora. Cora, Drew, and Eli vote for Ava.
-Finn and Gia vote for Ben. Nobody has challenge immunity, and no idols have been played.
-
-Ava has one usable idol named Ava-idol. Ben has one usable idol named Ben-idol.
-For this comparison, either idol may target Ava or Ben.
-No revotes: ties eliminate the first tied contestant in this order:
-Ava, Ben, Cora, Drew, Eli, Finn, Gia.
-
-Compare holding both idols with using one or two. Does the whole alliance survive?
-```
-
-Ava initially leaves, with votes 3–2–2 against Ava, Ben, and Cora. An idol on Ava
-alone shifts elimination to **Ben**, so it does not save the whole alliance.
-An idol on Ben alone still eliminates Ava. Protecting both allies nullifies five
-votes and eliminates **Cora**. The verified minimum is **two items**, with two
-equivalent ways to assign the two idols to the two allies.
-
-#### Advantage guide: this planner's explicit rules
-
-| Item | Effect and timing in this model | Important interactions |
-|---|---|---|
-| **Idol** | Protect its selected recipient before counting ballots. All ballots against the recipient are nullified. | Includes extra votes. It can protect another contestant. Two idols on one person do not protect a second person. |
-| **Extra vote** | Add one ballot from the item's owner against its selected legal target. | Does not change the owner's ordinary ballot. It can be nullified by an idol. Multiple distinct items may add multiple ballots. |
-| **Vote block** | Remove the selected contestant's ordinary ballot before the tally. | Does not remove an extra ballot, prevent an idol play, or remove a ballot twice if two blocks target the same voter. A challenge-immune contestant's vote can be blocked. |
-
-These declared rules are a reproducible Survivor-inspired variant. Actual
-advantage instructions and interactions vary; this plugin does not claim to
-implement every television season's rules.
-
-#### Inventory, search limits, and scoring
-
-- `AdvantageInput` contains the `council` and an `inventory` of **0–3 usable,
-  alliance-owned items**. Each item has a unique `id`, `owner`, `kind` (`idol`,
-  `extra_vote`, or `vote_block`), and a nonempty `allowed_targets` list. Each item
-  may be spent at most once. Different items can have the same owner.
-- Target restrictions are explicit. Without a stated special restriction, a
-  normal idol may target any contestant; an extra vote may target anyone except
-  its owner or a challenge-immune contestant; a vote block may target anyone
-  except its owner. Target lists may narrow the options the user wants compared.
-- Held idols are **inventory**, not protection already in effect. Only idols
-  already played belong in `council.idol_protected`. List only items usable in
-  this council; expiry, acquisition, and future ownership are outside the model.
-- The council must use `priority` ties with no revotes. Intended ordinary ballots,
-  challenge immunity, existing idol protection, and alliance membership stay fixed.
-  Other people do not change their votes in response to a proposed play.
-- Compare zero, one, or **two distinct inventory items** per plan. All allowed
-  target combinations are checked, in inventory/roster order. At the largest
-  supported roster (24), three idols with every target allowed produce **1,801**
-  plans. No probabilities, random draws, or model judgement enter that search.
-- `decision: hold` and `minimum_items_needed: 0` mean no *additional* item is
-  needed. The planner still shows single plays that would waste an item or harm
-  the alliance. `play` reports a minimum of one or two. `no_saving_plan` and a null
-  minimum mean none succeeds **within the two-item search**, not that three items
-  or a different strategy could never help.
-- The result includes total plans checked, all saving plans counted, the number
-  using the fewest items, and up to five complete recommendations. Every single
-  play is shown, not just the successful ones. A plan that protects every
-  contestant has no defined elimination under this ruleset; it is displayed as
-  invalid with an explanation and is never recommended.
-- All items have equal cost for this objective. A one-item idol plan and a
-  one-item vote-block plan are tied; the solver does not invent a future value for
-  either. Compare the alternatives before deciding what to conserve.
-
-`AdvantageOutput` echoes the interpreted scenario and inventory, baseline,
-decision, minimum items, complete plan counts, recommendations, and all
-single-play comparisons. The verifier independently rebuilds the weighted
-ballots and enumerates the full search, checking every returned field. A correct
-"hold" or "no saving plan" result passes just as a correct recommendation does.
-
-### Ordinary council rules before optional advantage plays
-
-1. There are **2–24 contestants** and a nonempty alliance drawn from that roster.
-   Names are case-sensitive, unique, printable, trimmed strings of 1–80
-   characters. Alliance and immunity lists contain no duplicates or unknown names.
-2. Every contestant casts **exactly one initial ballot** for another contestant.
-   There are no self votes or abstentions in these intended ordinary ballots.
-   The advantage planner applies optional extra ballots and vote blocks afterward.
-3. **Challenge immunity:** a ballot targeting a challenge-immune contestant is
-   invalid. Immune contestants still vote.
-4. **Idol protection:** the supplied list describes successful plays already made
-   before the count. Initial ballots targeting those contestants are valid ballots
-   but are nullified. Protected contestants still vote. Challenge immunity and
-   idol protection both last through revotes and rocks; the lists may overlap.
-5. The vulnerable contestant with the most counted votes is eliminated. A unique
-   leader needs no revote. At least one contestant must be vulnerable.
-6. If **all ballots are nullified**, all vulnerable contestants tie at zero.
-   Apply the selected tie rule to them. If only one contestant is vulnerable,
-   that contestant is eliminated with zero counted votes.
-7. The tie policy is one of:
-
-   | `rules.tie_rule` | Initial tie | Continued tie |
-   |---|---|---|
-   | `priority` | Eliminate the first tied contestant in `priority_order`. | No revote. |
-   | `revote_priority` | Every contestant outside the initial tied group votes once, targeting only that group. | Eliminate the first contestant still tied in `priority_order`. |
-   | `revote_rocks` | The same revote. | Initially tied contestants and all protected contestants are exempt from rocks. Eliminate the first remaining rock drawer in `priority_order`. |
-
-8. `priority_order` must contain **every contestant exactly once**, even if no tie
-   occurs. It is an explicit deterministic elimination order, not a probability
-   or an inferred random draw. It selects only among the applicable candidates.
-9. `revotes` is required but must be `[]` when there is no initial tie or the
-   policy is `priority`. Otherwise it must contain exactly one ballot from each
-   initially non-tied contestant, including immune voters. Initially tied
-   contestants do not vote. A zero-voter revote is allowed and leaves a tie at
-   zero. A rock deadlock with no eligible drawers is **invalid**.
-10. Exactly one contestant leaves. `alliance_survives` is true exactly when that
-    contestant is **outside the alliance**. Remaining members, all tally rows,
-    and deciding candidates are listed in the original `contestants` order.
-
-These are the plugin's complete rules, rather than an attempt to represent every
-television season. Hidden information, predicting votes, fire-making, final tribal
-council, and advantage types beyond the three explicitly supported are outside
-this model.
-
-### Input example
-
-`tests/scenarios/majority.input.json` contains:
-
-```json
-{
-  "contestants": ["Ava", "Ben", "Cora", "Drew", "Eli"],
-  "alliance": ["Ava", "Ben"],
-  "votes": [
-    {"voter": "Ava", "target": "Drew"},
-    {"voter": "Ben", "target": "Drew"},
-    {"voter": "Cora", "target": "Drew"},
-    {"voter": "Drew", "target": "Ava"},
-    {"voter": "Eli", "target": "Ava"}
-  ],
-  "challenge_immune": [],
-  "idol_protected": [],
-  "rules": {
-    "tie_rule": "priority",
-    "priority_order": ["Ava", "Ben", "Cora", "Drew", "Eli"]
-  },
-  "revotes": []
-}
-```
-
-Drew leaves with three votes; Ava has two. The alliance survives.
-Adding Drew to `idol_protected` nullifies three votes: Ava leaves and the
-alliance no longer survives. Both examples have hand-calculated expected outputs
-in `tests/scenarios/`.
-
-### Output and verification
-
-`CouncilOutput` requires all eight fields: `eliminated`, `alliance_survives`,
-`alliance_remaining`, `initial_tally`, `nullified_votes`, `revote_tally`,
-`resolution`, and `deciding_candidates`. Tallies include zero rows for every
-contestant. An unused revote tally is empty. `resolution` is `initial_vote`,
-`revote`, `priority`, or `rocks`.
-
-NanoAgent validates types and required fields using `contract.py`.
-`verifier/` independently reconstructs the entire expected result from the
-input. It does not import the runtime solver or trust its declared winner or
-survival flag. All fields must match; verdict scores are 1 for correct and 0
-otherwise. Invalid inputs are rejected, and tool failures raise errors.
-
-Only the standard library and declarative contract are used by the verifier.
-It has no randomness, environment access, clock, model, network, or file writes.
-NanoAgent also checks its imports and calls each verification twice in its
-restricted subprocess. No reference tool is needed because all ground truth is
-in the task input.
+The advantage interactions remain an explicit simplified variant: idols protect
+through revotes/rocks; extra votes and vote blocks affect the initial round only;
+a block removes only the ordinary ballot and does not cancel a separate extra
+vote. Supported final-four formats do not allow advantage plays. Special
+vote-loss/extra-vote revote exceptions, arbitrary season-specific timing,
+fire-making skill prediction, and probabilities are outside this model.
 
 ## Layout
 
@@ -350,23 +145,14 @@ survivor-alliance/
 ├── LICENSE
 ├── pyproject.toml
 ├── uv.lock
-├── .gitignore
-├── .env                    # comments only; no credentials needed
-├── src/plugin/             # MCP server, fixed scenario evaluator, resolver, and searches
-├── verifier/               # independent input and outcome checks
+├── src/plugin/             # MCP server, tribal evaluator, ballot helpers
+├── verifier/               # independent tribal replay and validation helpers
 ├── tests/
-│   ├── scenarios/          # task fixtures and hand-calculated expectations
-│   ├── rescues/            # hand-calculated strategic scenarios
-│   ├── advantages/         # hand-calculated idol/extra-vote/block search cases
-│   ├── fixed_scenarios/    # hand-calculated fixed plays and personal outcomes
-│   ├── test_scenario.py
-│   ├── test_vote.py
-│   ├── test_rescue.py
-│   ├── test_advantages.py
-│   ├── test_ui.py
-│   └── test_verifier.py
-├── ui/                     # fixed scenario and comparison cards; schema renderer for basic councils
-└── product/                # marketplace description and original torch icon
+│   ├── tribal/             # hand-calculated standard council/fire fixtures
+│   ├── test_verifier.py
+│   └── test_ui.py
+├── ui/                     # tribal scenario result card
+└── product/                # marketplace metadata and torch icon
 ```
 
 This folder is the entire repository root. It has its own project and lockfile;
@@ -407,7 +193,7 @@ paths on your computer:
 _ > nanoagent.cli.plugin.PluginRunConfig:
 plugin: /absolute/path/to/survivor-alliance
 task: scenario-outcome
-arguments: /absolute/path/to/survivor-alliance/tests/fixed_scenarios/idol-on-someone-else.input.json
+arguments: /absolute/path/to/survivor-alliance/tests/tribal/idol-on-other.input.json
 inputs: []
 timeout: 60.0
 ```
@@ -422,15 +208,6 @@ nanoagent plugin pack . /absolute/path/to/evidence/survivor-alliance.tar.gz
 The task run creates `result.json`, `verdict.json`, `run.log`, and its other
 standard NanoAgent run files. Keep those outside the plugin repository for the
 milestone report.
-
-To test the rescue task, use `task: single-vote-rescue` and point `arguments` at
-`tests/rescues/save-one.input.json` in a new run config. Its hand-calculated
-expected output is alongside it. These tool-run tasks require no API key when run this way.
-
-For the advantage task, use `task: advantage-planner` and
-`tests/advantages/two-idols-split-vote.input.json`. It also runs without a model
-key locally; ordinary-language chat uses RUSH's configured model. All four
-tasks have hand-calculated fixtures and deterministic verifiers.
 
 ### Separate Git repository
 
@@ -460,17 +237,6 @@ Publish that repository through the RUSH Lab marketplace and retain the real
 publication result in the report evidence. Local validation alone does not
 establish marketplace publication.
 
-Version 0.2.0 adds the rescue task and its result card. After committing and
-pushing changes, republish this repository through the marketplace and install
-the updated version to use them. An existing 0.1.0 installation keeps its old
-task set until it is updated.
-
-Version 0.3.0 adds `advantage-planner`, its advantage guide, and before/after
-comparisons. Republish and install that version to use the new task.
-
-Version 0.4.0 makes `scenario-outcome` the default: evaluate a guessed council
-with all assumed votes and actual item plays specified. Commit and push the
-changes, then use **Publish again from GitHub** in the marketplace. A GitHub
-push alone does not publish a new RUSH version. Installations following the
-latest published version can pick it up when reopened; pinned installations
-need the marketplace Update action.
+Version 0.5.1 removes the obsolete custom contracts, tools, and artificial tie
+policies. Only the standard tribal-council evaluator is exposed. Push and
+republish the new version to update RUSH.

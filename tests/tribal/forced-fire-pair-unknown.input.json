@@ -1,0 +1,21 @@
+{
+  "council": {
+    "contestants": [
+      "Ava",
+      "Ben",
+      "Cora",
+      "Drew"
+    ],
+    "alliance": [
+      "Ava",
+      "Cora"
+    ],
+    "votes": [],
+    "challenge_immune": [],
+    "revotes": [],
+    "format": "final_four_fire"
+  },
+  "plays": [],
+  "perspective": "Ava",
+  "resolution_facts": null
+}

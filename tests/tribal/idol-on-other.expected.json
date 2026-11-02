@@ -1,0 +1,97 @@
+{
+  "scenario": {
+    "council": {
+      "contestants": [
+        "John",
+        "Esther",
+        "Cora",
+        "Drew",
+        "Eli"
+      ],
+      "alliance": [
+        "John",
+        "Esther"
+      ],
+      "votes": [
+        {
+          "voter": "John",
+          "target": "Drew"
+        },
+        {
+          "voter": "Esther",
+          "target": "Drew"
+        },
+        {
+          "voter": "Cora",
+          "target": "John"
+        },
+        {
+          "voter": "Drew",
+          "target": "John"
+        },
+        {
+          "voter": "Eli",
+          "target": "John"
+        }
+      ],
+      "challenge_immune": [],
+      "revotes": [],
+      "format": null
+    },
+    "plays": [
+      {
+        "id": "Esther-idol",
+        "owner": "Esther",
+        "kind": "idol",
+        "target": "John"
+      }
+    ],
+    "perspective": "John",
+    "resolution_facts": null
+  },
+  "outcome": {
+    "stage": "complete",
+    "eliminated": "Drew",
+    "alliance_survives": true,
+    "alliance_remaining": [
+      "John",
+      "Esther"
+    ],
+    "initial_tally": [
+      {
+        "contestant": "John",
+        "votes": 0
+      },
+      {
+        "contestant": "Esther",
+        "votes": 0
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 2
+      },
+      {
+        "contestant": "Eli",
+        "votes": 0
+      }
+    ],
+    "nullified_votes": 3,
+    "revote_tally": [],
+    "resolution": "initial_vote",
+    "tied_contestants": [],
+    "revote_voters": [],
+    "rock_drawers": [],
+    "fire_contestants": [],
+    "needed_facts": []
+  },
+  "personal_outcome": "alliance_safe",
+  "idol_recipients": [
+    "John"
+  ],
+  "blocked_voters": [],
+  "extra_votes": []
+}

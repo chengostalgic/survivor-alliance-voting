@@ -1,0 +1,121 @@
+{
+  "scenario": {
+    "council": {
+      "contestants": [
+        "Ava",
+        "Ben",
+        "Cora",
+        "Drew"
+      ],
+      "alliance": [
+        "Ava",
+        "Cora"
+      ],
+      "votes": [
+        {
+          "voter": "Ava",
+          "target": "Ben"
+        },
+        {
+          "voter": "Ben",
+          "target": "Ava"
+        },
+        {
+          "voter": "Cora",
+          "target": "Ava"
+        },
+        {
+          "voter": "Drew",
+          "target": "Ben"
+        }
+      ],
+      "challenge_immune": [],
+      "revotes": [
+        {
+          "voter": "Cora",
+          "target": "Ava"
+        },
+        {
+          "voter": "Drew",
+          "target": "Ben"
+        }
+      ],
+      "format": null
+    },
+    "plays": [
+      {
+        "id": "Cora-idol",
+        "owner": "Cora",
+        "kind": "idol",
+        "target": "Cora"
+      }
+    ],
+    "perspective": "Ava",
+    "resolution_facts": null
+  },
+  "outcome": {
+    "stage": "deadlock",
+    "eliminated": null,
+    "alliance_survives": null,
+    "alliance_remaining": null,
+    "initial_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 2
+      },
+      {
+        "contestant": "Ben",
+        "votes": 2
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 0
+      }
+    ],
+    "nullified_votes": 0,
+    "revote_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 1
+      },
+      {
+        "contestant": "Ben",
+        "votes": 1
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 0
+      }
+    ],
+    "resolution": null,
+    "tied_contestants": [
+      "Ava",
+      "Ben"
+    ],
+    "revote_voters": [
+      "Cora",
+      "Drew"
+    ],
+    "rock_drawers": [
+      "Drew"
+    ],
+    "fire_contestants": [],
+    "needed_facts": [
+      "unanimous_decision_or_rock_result"
+    ]
+  },
+  "personal_outcome": "awaiting_result",
+  "idol_recipients": [
+    "Cora"
+  ],
+  "blocked_voters": [],
+  "extra_votes": []
+}

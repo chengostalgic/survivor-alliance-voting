@@ -1,16 +1,14 @@
 _ > nanoagent.plugin.v0001.ProductConfig:
-tagline: "Given these votes and plays, who goes home?"
+tagline: "What will happen at tribal council given a certain set of assumptions"
 summary: >-
   Describe a hypothetical council in chat, assuming you know every vote and which
-  idols and advantages are played. Calculate who leaves and whether you or an ally
-  goes home. Inspect verified tallies under those assumptions; this is a scenario
-  calculator, and does not predict actual secret votes.
+  idols and advantages are played. Correctly calculate who goes home in a given scenario.
 highlights:
   - "Explain assumed votes and explicit item plays in ordinary language."
   - "Distinguish owning an idol from playing it on a particular recipient."
   - "See who leaves, whether you survive, and whether your whole alliance stays."
   - "Check the interpreted assumptions and independently verified vote totals."
 steps:
-  - "Describe the roster, alliance, assumed ordinary votes, immunity, and tie rules."
+  - "Describe the roster, alliance, assumed votes, immunity, and any played items."
   - "List every idol, extra vote, and vote block being played, or say there are none."
-  - "Read the conditional outcome and check that the interpreted facts match your scenario."
+  - "Read the calculated outcome or pending revote/rocks/fire stage; check the interpreted facts."

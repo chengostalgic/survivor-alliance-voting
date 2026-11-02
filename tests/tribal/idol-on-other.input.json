@@ -1,0 +1,50 @@
+{
+  "council": {
+    "contestants": [
+      "John",
+      "Esther",
+      "Cora",
+      "Drew",
+      "Eli"
+    ],
+    "alliance": [
+      "John",
+      "Esther"
+    ],
+    "votes": [
+      {
+        "voter": "John",
+        "target": "Drew"
+      },
+      {
+        "voter": "Esther",
+        "target": "Drew"
+      },
+      {
+        "voter": "Cora",
+        "target": "John"
+      },
+      {
+        "voter": "Drew",
+        "target": "John"
+      },
+      {
+        "voter": "Eli",
+        "target": "John"
+      }
+    ],
+    "challenge_immune": [],
+    "revotes": [],
+    "format": null
+  },
+  "plays": [
+    {
+      "id": "Esther-idol",
+      "owner": "Esther",
+      "kind": "idol",
+      "target": "John"
+    }
+  ],
+  "perspective": "John",
+  "resolution_facts": null
+}

@@ -1,7 +1,7 @@
 _ > nanoagent.plugin.v0001.ManifestConfig:
 id: survivor-alliance
 name: Survivor Alliance
-version: 0.4.0
+version: 0.5.1
 status: ready
 spec: nanoagent.plugin/v0001
 
@@ -16,110 +16,48 @@ permissions > nanoagent.plugin.v0001.PermissionsConfig:
     write: [workspace]
 
 tools > dict[contract.Tool, nanoagent.plugin.v0001.ToolConfig]:
-  evaluate_scenario:
-    description: Calculate exactly one assumed council from fixed ordinary votes and explicit idol, extra-vote, and vote-block plays. Ownership alone gives no protection. Return who leaves, personal/alliance survival, and complete tallies; do not optimize or predict actual votes.
-  resolve_vote:
-    description: Resolve a Survivor-style council from supplied ballots, immunity, and explicit tie rules.
-  find_rescue:
-    description: Check every legal initial-vote change by one alliance member and find moves that save the whole alliance.
-  plan_advantages:
-    description: Compare holding items, idols, extra votes, and vote blocks; find minimum-item saving plays and their outcomes.
-
+  resolve_tribal:
+    description: Resolve standard voting, tied-player-excluded revotes, unanimous decisions or rocks, and explicit final-four voting/fire formats. Missing revotes, rock results, or fire winners produce a pending result; ballot and roster order never choose a loser.
 tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
   scenario-outcome:
     description: >-
-      Default task for "who goes home?", "do I go home?", or "does our alliance survive?"
-      Evaluate the user's guessed or hypothetical council assuming every supplied vote
-      and item play happens exactly as stated. Accept ordinary prose; never ask for JSON.
-      Extract the complete roster, alliance, one ordinary vote per person, challenge
-      immunity, and every item PLAYED by allies or opponents, with owner, kind, and target.
-      "Esther has an idol" means it is held and gives nobody protection. "Esther plays
-      her idol on John" protects JOHN, not Esther. Ask for the recipient if unstated;
-      never turn ownership into a play. Explicitly ask whether any other items are
-      played if the scenario does not say; "no other plays" closes that question.
-      Set council.idol_protected to [] and list all played idols in plays. An extra vote
-      adds a ballot; a vote block removes a target's ordinary initial ballot. These
-      effects apply regardless of the owner's alliance. Held items need no inventory
-      for this task. Use perspective for the user's named alliance member, or null
-      if unidentified; do not ask their identity unless a personal answer is needed.
-      Ask only for missing essential facts or explicit tie rules, preserving facts
-      already supplied. Never invent ballots, plays, revotes, or a rock-draw order.
-      Once complete, CALL THIS TASK instead of calculating an unverified answer in chat.
-      State outcomes as "Under these assumed votes and plays, ...". A valid result
-      certifies the calculation, not the likelihood of these assumptions or the chat's
-      prose interpretation. Do not search for alternative plays unless requested.
+      DEFAULT for all ordinary Survivor scenarios: who goes home, do I survive,
+      does my alliance survive, what happens after these idol/advantage plays?
+      The user speaks naturally; construct arguments yourself, never ask for JSON.
+      Use council.format null for ordinary tribal voting, including a four-person
+      tribe. Use the built-in vote/revote/deadlock rules.
+      Supply the roster, alliance, assumed ordinary votes, challenge immunity,
+      all actual assumed plays (owner, kind, target), and perspective or null.
+      Ownership does not play an idol: Esther's idol played ON JOHN protects John.
+      Set revotes: [] and resolution_facts: null when those details are unknown.
+      CALL THIS TASK to count. An initial tie automatically requires a revote:
+      tied contestants DO NOT vote, and other contestants vote only for those tied.
+      The result names the eligible revoters if their ballots are missing.
+      If a revote stays tied, the standard format allows a stated unanimous
+      decision; otherwise eligible non-tied, non-protected players risk rocks.
+      Never ask for an ordered roster, randomly choose a loser, or invent votes.
+      A missing rock result is a valid deadlock result with eligible drawers shown.
+      If a draw outcome was explicitly assumed, put that name in rock_draw_loser.
+      For the final four, distinguish final_four_vote (deadlocked vote goes to
+      fire) from final_four_fire (forced-fire format, no votes). Four people at
+      an ordinary tribe are NOT automatically the final four. Ask about format
+      only when the user's final-four description leaves it ambiguous.
+      In forced fire use votes: [], revotes: [], plays: []; record the stated fire
+      pair and winner in resolution_facts, or leave them unknown. Missing fire
+      participants or winner produces a pending fire result, never a prediction.
+      When no extra resolution facts were stated use resolution_facts: null;
+      otherwise its fields are consensus_eliminated, rock_draw_loser, fire_participants,
+      and fire_winner, with null for unknown names and [] for an unknown pair.
+      Report the calculated stage and conditional result, including a correct
+      losing result.
     runner: tool
-    tools: [evaluate_scenario]
+    tools: [resolve_tribal]
     reference: null
     instructions: >-
-      Apply only the listed plays to the fixed ordinary ballots. Each item is used
-      once; idol ownership and protected recipient are different fields. Blocks remove
-      ordinary initial ballots, including those of immune voters, but not added extra
-      ballots. Extra votes and blocks affect the initial round only; supplied revotes
-      follow the declared council rules. Idol protection lasts through revotes and rocks.
-      Return the interpreted scenario, full outcome, personal outcome when specified,
-      protected recipients, blocked voters, and extra ballots. A correct result where
-      the user or an ally goes home must pass verification just like a safe result.
-  alliance-survival:
-    description: >-
-      Legacy ordinary-ballot calculation; prefer scenario-outcome for chat questions
-      about a specified council and actual assumed item plays. Does every alliance
-      member survive these assumed votes? Convert the user's plain-language
-      scenario into the typed council input; expand grouped votes and preserve names.
-      Ask for any missing roster, alliance, ballots, immunity, or tie rules. Never
-      invent ballots or a tie priority. The user does not need to write JSON.
-    runner: tool
-    tools: [resolve_vote]
-    reference: null
-    instructions: >-
-      Resolve the council under the README's explicit rules. Return the eliminated
-      contestant, complete counted tallies, nullified vote count, resolution method,
-      deciding candidates, and remaining alliance. Survival means every alliance
-      member remains. Reject inconsistent scenarios rather than inventing missing votes.
-  single-vote-rescue:
-    description: >-
-      Only when the user explicitly asks to compare changed votes: can one alliance
-      member changing their assumed initial vote save the entire alliance?
-      Convert the user's plain-language scenario into council facts; expand grouped
-      votes. Ask for missing ballots, immunity, and an explicit priority tie order;
-      never invent these. This search requires tie_rule priority and no revotes.
-      Return the exhaustive search and show the interpreted council for the user to check.
-    runner: tool
-    tools: [find_rescue]
-    reference: null
-    instructions: >-
-      Resolve the baseline. If the alliance already survives, report already_safe
-      with zero changes tested. Otherwise try every legal initial-vote change by
-      exactly one alliance member, holding all other facts fixed. Ties use the
-      explicit priority order. Count all saving changes and return the first five
-      in roster voter/target order, including each complete outcome. Never claim
-      a multi-vote rescue or a rescue requiring different immunity or tie rules.
-  advantage-planner:
-    description: >-
-      Only when the user explicitly requests alternative item plays or asks whether
-      to spend an item: do we need to play an idol or advantage under these assumed votes?
-      For a fixed list of plays and "who goes home?", use scenario-outcome instead.
-      Extract known intended ordinary ballots and up to three usable alliance-owned
-      items from ordinary chat. Held idols belong in inventory; only already-played
-      idols go in council.idol_protected. Ask for missing facts, inventory, or tie
-      priority. Use priority ties and no revotes. Compare no play, all singles, and
-      all pairs. Honor stated target restrictions; otherwise idols may target anyone,
-      extra votes any legal vote target, and vote blocks anyone except their owner.
-      In this ruleset, idols nullify ordinary and extra votes against their recipient.
-      An extra ballot survives its owner's ordinary vote being blocked; a vote block
-      removes only the ordinary ballot, once. Explain these rules for informational
-      questions without inventing a council or implying they cover every season.
-      Describe the interpreted facts and the fewest-item saving plans; never claim
-      predictions about how other people react or plans using more than two items.
-    runner: tool
-    tools: [plan_advantages]
-    reference: null
-    instructions: >-
-      Hold the ordinary intended ballots fixed. A vote block removes only its target's
-      original ballot, once. An extra vote adds a separate ballot from its owner even
-      if the owner's original ballot is blocked. Idols protect a recipient from all
-      counted ballots, including extra votes. Items are single-use and at most two
-      distinct items may be played per candidate plan. Compare every legal plan;
-      minimize item count, not assumed future strategic value. Return all single-play
-      summaries and the first five minimum-item saving plans with full outcomes.
-      Explain that no_saving_plan applies only to this declared two-item search.
+      Apply only the stated votes and plays. Votes are a multiset: casting or
+      listing order never affects tallies or elimination. Do not solve an
+      unobserved random draw or challenge. Return complete if one loser follows
+      from the assumptions, otherwise the precise pending stage and missing facts.
+      Extra votes and vote blocks affect the initial round only in this declared
+      variant. Idols last through revotes and rocks. This models the supported
+      formats, not every season-specific advantage or vote-loss exception.

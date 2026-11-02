@@ -1,0 +1,84 @@
+{
+  "scenario": {
+    "council": {
+      "contestants": [
+        "Ava",
+        "Ben",
+        "Cora",
+        "Drew"
+      ],
+      "alliance": [
+        "Ava",
+        "Cora"
+      ],
+      "votes": [
+        {
+          "voter": "Ava",
+          "target": "Ben"
+        },
+        {
+          "voter": "Ben",
+          "target": "Ava"
+        },
+        {
+          "voter": "Cora",
+          "target": "Ava"
+        },
+        {
+          "voter": "Drew",
+          "target": "Ben"
+        }
+      ],
+      "challenge_immune": [],
+      "revotes": [],
+      "format": null
+    },
+    "plays": [],
+    "perspective": "Ava",
+    "resolution_facts": null
+  },
+  "outcome": {
+    "stage": "revote_required",
+    "eliminated": null,
+    "alliance_survives": null,
+    "alliance_remaining": null,
+    "initial_tally": [
+      {
+        "contestant": "Ava",
+        "votes": 2
+      },
+      {
+        "contestant": "Ben",
+        "votes": 2
+      },
+      {
+        "contestant": "Cora",
+        "votes": 0
+      },
+      {
+        "contestant": "Drew",
+        "votes": 0
+      }
+    ],
+    "nullified_votes": 0,
+    "revote_tally": [],
+    "resolution": null,
+    "tied_contestants": [
+      "Ava",
+      "Ben"
+    ],
+    "revote_voters": [
+      "Cora",
+      "Drew"
+    ],
+    "rock_drawers": [],
+    "fire_contestants": [],
+    "needed_facts": [
+      "revote_ballots"
+    ]
+  },
+  "personal_outcome": "awaiting_result",
+  "idol_recipients": [],
+  "blocked_voters": [],
+  "extra_votes": []
+}

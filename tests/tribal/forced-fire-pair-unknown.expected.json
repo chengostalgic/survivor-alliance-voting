@@ -1,0 +1,45 @@
+{
+  "scenario": {
+    "council": {
+      "contestants": [
+        "Ava",
+        "Ben",
+        "Cora",
+        "Drew"
+      ],
+      "alliance": [
+        "Ava",
+        "Cora"
+      ],
+      "votes": [],
+      "challenge_immune": [],
+      "revotes": [],
+      "format": "final_four_fire"
+    },
+    "plays": [],
+    "perspective": "Ava",
+    "resolution_facts": null
+  },
+  "outcome": {
+    "stage": "fire_required",
+    "eliminated": null,
+    "alliance_survives": null,
+    "alliance_remaining": null,
+    "initial_tally": [],
+    "nullified_votes": 0,
+    "revote_tally": [],
+    "resolution": null,
+    "tied_contestants": [],
+    "revote_voters": [],
+    "rock_drawers": [],
+    "fire_contestants": [],
+    "needed_facts": [
+      "fire_making_pair",
+      "fire_making_winner"
+    ]
+  },
+  "personal_outcome": "awaiting_result",
+  "idol_recipients": [],
+  "blocked_voters": [],
+  "extra_votes": []
+}
