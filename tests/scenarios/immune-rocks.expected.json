@@ -1,0 +1,49 @@
+{
+  "eliminated": "Drew",
+  "alliance_survives": true,
+  "alliance_remaining": [
+    "Ava",
+    "Cora"
+  ],
+  "initial_tally": [
+    {
+      "contestant": "Ava",
+      "votes": 2
+    },
+    {
+      "contestant": "Ben",
+      "votes": 2
+    },
+    {
+      "contestant": "Cora",
+      "votes": 0
+    },
+    {
+      "contestant": "Drew",
+      "votes": 0
+    }
+  ],
+  "nullified_votes": 0,
+  "revote_tally": [
+    {
+      "contestant": "Ava",
+      "votes": 1
+    },
+    {
+      "contestant": "Ben",
+      "votes": 1
+    },
+    {
+      "contestant": "Cora",
+      "votes": 0
+    },
+    {
+      "contestant": "Drew",
+      "votes": 0
+    }
+  ],
+  "resolution": "rocks",
+  "deciding_candidates": [
+    "Drew"
+  ]
+}

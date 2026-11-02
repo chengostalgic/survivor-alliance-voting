@@ -1,0 +1,29 @@
+{
+  "contestants": [
+    "Ava",
+    "Ben"
+  ],
+  "alliance": [
+    "Ava"
+  ],
+  "votes": [
+    {
+      "voter": "Ava",
+      "target": "Ben"
+    },
+    {
+      "voter": "Ben",
+      "target": "Ava"
+    }
+  ],
+  "challenge_immune": [],
+  "idol_protected": [],
+  "rules": {
+    "tie_rule": "revote_priority",
+    "priority_order": [
+      "Ben",
+      "Ava"
+    ]
+  },
+  "revotes": []
+}

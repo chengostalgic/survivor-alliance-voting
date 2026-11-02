@@ -1,0 +1,25 @@
+{
+  "eliminated": "Cora",
+  "alliance_survives": false,
+  "alliance_remaining": [],
+  "initial_tally": [
+    {
+      "contestant": "Ava",
+      "votes": 0
+    },
+    {
+      "contestant": "Ben",
+      "votes": 0
+    },
+    {
+      "contestant": "Cora",
+      "votes": 0
+    }
+  ],
+  "nullified_votes": 3,
+  "revote_tally": [],
+  "resolution": "initial_vote",
+  "deciding_candidates": [
+    "Cora"
+  ]
+}

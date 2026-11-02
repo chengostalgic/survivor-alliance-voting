@@ -1,0 +1,33 @@
+{
+  "eliminated": "Ben",
+  "alliance_survives": true,
+  "alliance_remaining": [
+    "Ava"
+  ],
+  "initial_tally": [
+    {
+      "contestant": "Ava",
+      "votes": 1
+    },
+    {
+      "contestant": "Ben",
+      "votes": 1
+    }
+  ],
+  "nullified_votes": 0,
+  "revote_tally": [
+    {
+      "contestant": "Ava",
+      "votes": 0
+    },
+    {
+      "contestant": "Ben",
+      "votes": 0
+    }
+  ],
+  "resolution": "priority",
+  "deciding_candidates": [
+    "Ava",
+    "Ben"
+  ]
+}

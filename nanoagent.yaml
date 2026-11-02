@@ -1,0 +1,32 @@
+_ > nanoagent.plugin.v0001.ManifestConfig:
+id: survivor-alliance
+name: Survivor Alliance
+version: 0.1.0
+status: ready
+spec: nanoagent.plugin/v0001
+
+runtime > nanoagent.plugin.v0001.RuntimeConfig:
+  type: mcp_stdio
+  command: [uv, run, --frozen, python, -m, plugin]
+
+permissions > nanoagent.plugin.v0001.PermissionsConfig:
+  network > nanoagent.plugin.v0001.NetworkConfig:
+    hosts: []
+  filesystem > nanoagent.plugin.v0001.FilesystemConfig:
+    write: [workspace]
+
+tools > dict[contract.Tool, nanoagent.plugin.v0001.ToolConfig]:
+  resolve_vote:
+    description: Resolve a Survivor-style council from supplied ballots, immunity, and explicit tie rules.
+
+tasks > dict[contract.Task, nanoagent.plugin.v0001.TaskConfig]:
+  alliance-survival:
+    description: Does every member of your alliance survive this Survivor-style vote?
+    runner: tool
+    tools: [resolve_vote]
+    reference: null
+    instructions: >-
+      Resolve the council under the README's explicit rules. Return the eliminated
+      contestant, complete counted tallies, nullified vote count, resolution method,
+      deciding candidates, and remaining alliance. Survival means every alliance
+      member remains. Reject inconsistent scenarios rather than inventing missing votes.
